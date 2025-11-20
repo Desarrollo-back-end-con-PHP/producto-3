@@ -1,3 +1,48 @@
+## Arrancar el proyecto por primera vez:
+
+docker run --rm \
+ -u "$(id -u):$(id -g)" \
+ -v "$(pwd):/var/www/html" \
+ -w /var/www/html \
+ laravelsail/php84-composer:latest \
+ composer install --ignore-platform-reqs
+
+### Copia el archivo de entorno (si no lo tienes):
+
+cp .env.example .env
+
+consultar en terminal id -u y id-g para ver que valor asignar a WWWUSER = ? y WWWGROUP = ?
+
+modificar si es necesario las credenciales de la base de datos.
+
+### Levanta el proyecto
+
+Laravel recomienda usar su comando sail en lugar de docker-compose directo, pero es lo mismo
+
+./vendor/bin/sail up -d
+
+### Generar la calve de enciptación:
+
+./vendor/bin/sail artisan key:generate
+
+### Migrar la base de datos:
+
+./vendor/bin/sail artisan migrate
+
+### Visualizar en navegador:
+
+acceder a: http://localhost:80
+
+## Comandos útiles:
+
+Es el equivalente a docker-compose down
+./vendor/bin/sail down
+
+Es el equivalente a docker-compose up -d
+./vendor/bin/sail artisan key:generate
+
+# CONTENIDO GENERADO AUTOMÁTICAMENTE POR LARAVEL
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
@@ -11,13 +56,13 @@
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+-   [Simple, fast routing engine](https://laravel.com/docs/routing).
+-   [Powerful dependency injection container](https://laravel.com/docs/container).
+-   Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+-   Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+-   Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+-   [Robust background job processing](https://laravel.com/docs/queues).
+-   [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
@@ -33,14 +78,14 @@ We would like to extend our thanks to the following sponsors for funding Laravel
 
 ### Premium Partners
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+-   **[Vehikl](https://vehikl.com)**
+-   **[Tighten Co.](https://tighten.co)**
+-   **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+-   **[64 Robots](https://64robots.com)**
+-   **[Curotec](https://www.curotec.com/services/technologies/laravel)**
+-   **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+-   **[Redberry](https://redberry.international/laravel-development)**
+-   **[Active Logic](https://activelogic.com)**
 
 ## Contributing
 
