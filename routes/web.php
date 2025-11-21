@@ -59,20 +59,20 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 Route::prefix('hotel')->group(function () {
     //--------------- Rutas públicas para hoteles (NO logueados)
     Route::middleware('guest:hotel')->group(function () {
-        //Loggin
+        //LOGIN
         Route::get('/login', [\App\Http\Controllers\HotelAuthController::class, 'showLoginForm'])->name('hotel.login');
         Route::post('/login', [\App\Http\Controllers\HotelAuthController::class, 'login'])->name('hotel.login.post');
     });
 
     // -------------- Rutas protegidas para hoteles (SI logueados)
     Route::middleware('auth:hotel')->group(function () {
-        //logout
+        //LOGOUT
         Route::post('/logout', [\App\Http\Controllers\HotelAuthController::class, 'logout'])->name('hotel.logout');
 
-        //-------------------- PANEL CORPORATIVO HOTELES --------------------------------------------
-        // Esto es temporal hasta que creemos el HotelPanelController
-        Route::get('/panel', function () {
-            return "BIENVENIDO AL PANEL DEL HOTEL: " . Auth::guard('hotel')->user()->usuario;
-        })->name('hotel.panel');
+        //PANEL DE CONTROL CORPORATIVO
+        Route::get('/panel', [\App\Http\Controllers\HotelPanelController::class, 'index'])->name('hotel.panel');
+
+        //CREAR RESERVA
+        Route::get('/reservas/crear', [\App\Http\Controllers\HotelPanelController::class, 'createReserva'])->name('hotel.reservas.create');
     });
 });
