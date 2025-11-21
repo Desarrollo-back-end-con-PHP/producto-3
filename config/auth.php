@@ -40,6 +40,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'hotel' => [
+            'driver' => 'session',
+            'provider' => 'hotels',
+        ],
     ],
 
     /*
@@ -63,6 +68,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\TransferViajero::class,
+        ],
+        //se añaden los hoteles como usuario para el panelCorporativo
+        'hotels' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\TransferHotel::class,
         ],
 
         // 'users' => [

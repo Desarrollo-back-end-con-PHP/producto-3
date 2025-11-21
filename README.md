@@ -29,6 +29,10 @@ Laravel recomienda usar su comando sail en lugar de docker-compose directo, pero
 
 ./vendor/bin/sail artisan migrate
 
+### Rellenar la base de datos con los seeders:
+
+./vendor/bin/sail artisan db:seed
+
 ### Visualizar en navegador:
 
 acceder a: http://localhost:80
