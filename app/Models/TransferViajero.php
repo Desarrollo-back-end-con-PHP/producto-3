@@ -34,11 +34,9 @@ class TransferViajero extends Authenticatable
     ];
 
     //crear atributos
-    protected function casts(): array
-    {
-        return [
-            'password' => 'hashed',
-            'fecha_creacion' => 'datetime',
-        ];
-    }
+    protected $casts = [
+    'password' => 'hashed',
+    'fecha_creacion' => 'datetime',
+];
+
 }
