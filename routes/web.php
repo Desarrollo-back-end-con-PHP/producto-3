@@ -51,6 +51,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::put('hoteles/{id}', [AdminHotelController::class, 'update'])->name('admin.hoteles.update');
     //ELIMINAR (DELETE)
     Route::delete('/hoteles/{id}', [AdminHotelController::class, 'destroy'])->name('admin.hoteles.destroy');
+
+
+    //------------------------ RESERVAS   ------------------------------------------
+    //MOSTRAR RESERVAS Y COMISIONES 
+    Route::get('/reservas', [\App\Http\Controllers\AdminReservaController::class, 'index'])->name('admin.reservas.index');
 });
 
 
@@ -72,7 +77,8 @@ Route::prefix('hotel')->group(function () {
         //PANEL DE CONTROL CORPORATIVO
         Route::get('/panel', [\App\Http\Controllers\HotelPanelController::class, 'index'])->name('hotel.panel');
 
-        //CREAR RESERVA
+        //RESERVAS
         Route::get('/reservas/crear', [\App\Http\Controllers\HotelPanelController::class, 'createReserva'])->name('hotel.reservas.create');
+        Route::post('/reservas0', [\App\Http\Controllers\HotelPanelController::class, 'store'])->name('hotel.reservas.store');
     });
 });
