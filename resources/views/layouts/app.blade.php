@@ -56,7 +56,7 @@
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
 
                                 @if(Auth::guard('web')->check() && Auth::user()->email === 'admin@islatransfers.com')
-                                <li><a class="dropdown-item" href="{{ route('admin.hoteles.index') }}">Panel Admin</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">Panel Admin</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>

@@ -36,7 +36,7 @@ class AuthController extends Controller
             $user = Auth::user();
 
             if ($user->email === 'admin@islatransfers.com') {
-                return redirect()->intended('/admin/hoteles'); //COMPROBAR DIRECCIÓN
+                return redirect()->intended('/admin/dashboard');
             }
 
             return redirect()->intended('/usuario/perfil'); //COMPROBAR QUE ESTA ES LA DIRECCIÓN DEL PERFILE DE USUARIO!!

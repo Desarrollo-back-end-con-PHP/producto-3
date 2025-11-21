@@ -38,6 +38,9 @@ Route::middleware('auth')->group(function () {
 //Grupo de rutas para Admin con prefijo admin, valida por el correo admin@islatransfers.com
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
+    //DASHBOARD
+    Route::get('/dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->name('admin.dashboard');
+
     //------------------------ HOTELES -----------------------------------------------------------
     //LISTAR (GET)
     Route::get('/hoteles', [AdminHotelController::class, 'index'])->name('admin.hoteles.index');

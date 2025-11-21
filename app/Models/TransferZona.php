@@ -13,4 +13,12 @@ class TransferZona extends Model
     protected $primaryKey = 'id_zona';
 
     protected $fillable = ['descripcion'];
+
+    /**
+     * Ver los hoteles de una zona.
+     */
+    public function hoteles()
+    {
+        return $this->hasMany(TransferHotel::class, 'id_zona', 'id_zona');
+    }
 }
