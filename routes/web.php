@@ -52,3 +52,27 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     //ELIMINAR (DELETE)
     Route::delete('/hoteles/{id}', [AdminHotelController::class, 'destroy'])->name('admin.hoteles.destroy');
 });
+
+
+// --------------------- RUTAS PANEL CORPORATIVO (HOTELES) -------------------------------
+// Gestion ael acceso de los hoteles a su panel corporativo
+Route::prefix('hotel')->group(function () {
+    //--------------- Rutas públicas para hoteles (NO logueados)
+    Route::middleware('guest:hotel')->group(function () {
+        //Loggin
+        Route::get('/login', [\App\Http\Controllers\HotelAuthController::class, 'showLoginForm'])->name('hotel.login');
+        Route::post('/login', [\App\Http\Controllers\HotelAuthController::class, 'login'])->name('hotel.login.post');
+    });
+
+    // -------------- Rutas protegidas para hoteles (SI logueados)
+    Route::middleware('auth:hotel')->group(function () {
+        //logout
+        Route::post('/logout', [\App\Http\Controllers\HotelAuthController::class, 'logout'])->name('hotel.logout');
+
+        //-------------------- PANEL CORPORATIVO HOTELES --------------------------------------------
+        // Esto es temporal hasta que creemos el HotelPanelController
+        Route::get('/panel', function () {
+            return "BIENVENIDO AL PANEL DEL HOTEL: " . Auth::guard('hotel')->user()->usuario;
+        })->name('hotel.panel');
+    });
+});
