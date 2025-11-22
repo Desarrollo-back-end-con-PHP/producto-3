@@ -12,11 +12,11 @@ class ViajeroController extends Controller
     public function mostrarPerfil()
     {
         $usuario = Auth::user();
-        $mensaje = session('mensaje');
 
-        return view('user.my_profile', [
-            'usuario' => $usuario,
-            'mensaje' => $mensaje,
+        return response()->json([
+        'usuario' => $usuario,
+        'mensaje' => session('mensaje') ?? null,
+
         ]);
     }
 
@@ -37,13 +37,10 @@ class ViajeroController extends Controller
 
         $exito = $usuario->update($data);
 
-        if ($exito) {
-            return redirect()->route('perfil')
-                             ->with('mensaje', ProfileMessageHelper::EXITO_DATOS);
-        } else {
-            return redirect()->route('perfil')
-                             ->with('mensaje', ProfileMessageHelper::ERROR_DATOS);
-        }
+        return response()->json([
+        'success' => $exito,
+        'mensaje' => $exito ? ProfileMessageHelper::EXITO_DATOS : ProfileMessageHelper::ERROR_DATOS,
+    ]);
     }
 
     public function actualizarContrasena(Request $request)
@@ -57,21 +54,21 @@ class ViajeroController extends Controller
         $usuario->password = Hash::make($data['nueva_contrasena']);
         $exito = $usuario->save();
 
-        if ($exito) {
-            return redirect()->route('perfil')
-                             ->with('mensaje', ProfileMessageHelper::EXITO_PASS);
-        } else {
-            return redirect()->route('perfil')
-                             ->with('mensaje', ProfileMessageHelper::ERROR_BD_PASS);
-        }
+           return response()->json([
+        'success' => $exito,
+        'mensaje' => $exito ? ProfileMessageHelper::EXITO_PASS : ProfileMessageHelper::ERROR_BD_PASS,
+    ]);
     }
 
     public function eliminarUsuario(Request $request)
     {
         $usuario = Auth::user();
         if (!$usuario) {
-            return redirect()->route('login');
-        }
+        return response()->json([
+            'success' => false,
+            'mensaje' => 'Usuario no autenticado'
+        ], 401);
+    }
 
         $exito = $usuario->delete();
 
@@ -79,12 +76,11 @@ class ViajeroController extends Controller
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-
-            return redirect()->route('login')
-                             ->with('mensaje', ProfileMessageHelper::EXITO_DELETE);
-        } else {
-            return redirect()->route('perfil')
-                             ->with('mensaje', ProfileMessageHelper::ERROR_DELETE);
         }
+
+          return response()->json([
+        'success' => $exito,
+        'mensaje' => $exito ? ProfileMessageHelper::EXITO_DELETE : ProfileMessageHelper::ERROR_DELETE,
+    ]);
     }
 }
