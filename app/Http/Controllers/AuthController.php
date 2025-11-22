@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\TransferViajero;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class AuthController extends Controller
 {
