@@ -36,38 +36,55 @@
 
                     <ul class="navbar-nav ms-auto">
 
-                        @auth
                         @php
-                        // Obtenemos el nombre del usuario logueado
-                        $user = Auth::user();
-                        $userName = $user->nombre ?? $user->usuario; // Compatible con Viajero y Hotel
-                        $firstLetter = strtoupper(substr($userName, 0, 1));
+                        // 1. Intentamos obtener el usuario de cualquiera de los dos guards
+                        $user = null;
+                        $guardName = null;
+
+                        if (Auth::guard('web')->check()) {
+                        $user = Auth::guard('web')->user();
+                        $guardName = 'web';
+                        } elseif (Auth::guard('hotel')->check()) {
+                        $user = Auth::guard('hotel')->user();
+                        $guardName = 'hotel';
+                        }
                         @endphp
 
+                        @if($user)
+
+                        <?php
+                        // Preparamos el nombre para mostrar
+                        // Si es Hotel usa 'usuario', si es Viajero usa 'nombre'
+                        $displayName = $user->nombre ?? $user->usuario;
+                        $firstLetter = strtoupper(substr($displayName, 0, 1));
+                        ?>
+
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <div class="user-avatar me-2">
                                     {{ $firstLetter }}
                                 </div>
                                 <span class="text-light d-none d-lg-inline">
-                                    Hola, {{ $userName }}
+                                    Hola, {{ $displayName }}
                                 </span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
 
-                                @if(Auth::guard('web')->check() && Auth::user()->email === 'admin@islatransfers.com')
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+
+                                @if($guardName === 'web' && $user->email === 'admin@islatransfers.com')
                                 <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">Panel Admin</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 @endif
 
-                                @if(Auth::guard('web')->check())
+                                @if($guardName === 'web')
                                 <li><a class="dropdown-item" href="{{ route('usuario.perfil') }}">Mi Perfil</a></li>
                                 @endif
 
-                                @if(Auth::guard('hotel')->check())
+                                @if($guardName === 'hotel')
                                 <li><a class="dropdown-item" href="{{ route('hotel.panel') }}">Panel Corporativo</a></li>
+                                <li><a class="dropdown-item" href="{{ route('hotel.reservas.create') }}">Nueva Reserva</a></li>
                                 @endif
 
                                 <li>
@@ -75,23 +92,25 @@
                                 </li>
 
                                 <li>
-                                    <form action="{{ Auth::guard('hotel')->check() ? route('hotel.logout') : route('logout') }}" method="POST">
+                                    <form action="{{ $guardName === 'hotel' ? route('hotel.logout') : route('logout') }}" method="POST">
                                         @csrf
-                                        <button type="submit" class="dropdown-item">Cerrar Sesión</button>
+                                        <button type="submit" class="dropdown-item text-danger">Cerrar Sesión</button>
                                     </form>
                                 </li>
                             </ul>
                         </li>
-                        @endauth
 
-                        @guest
+                        @else
+
                         <li class="nav-item">
                             <a class="text-light nav-link" href="{{ route('login') }}">Login</a>
                         </li>
                         <li class="nav-item">
                             <a class="text-light nav-link" href="{{ route('register') }}">Registro</a>
                         </li>
-                        @endguest
+
+                        @endif
+
 
                     </ul>
                 </div>

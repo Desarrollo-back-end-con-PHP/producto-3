@@ -42,6 +42,11 @@ class AdminHotelController extends Controller
         //marcar como activo
         $validated['status'] = 'activo';
 
+        if (isset($validated['comision'])) {
+            $validated['Comision'] = $validated['comision'];
+            unset($validated['comision']); // Borramos la minúscula para limpiar
+        }
+
         //Guardar, hace un INSERT
         \App\Models\TransferHotel::create($validated);
 
@@ -70,6 +75,11 @@ class AdminHotelController extends Controller
             $validated['password'] = \Illuminate\Support\Facades\Hash::make($validated['password']);
         } else {
             unset($validated['password']);
+        }
+
+        if (isset($validated['comision'])) {
+            $validated['Comision'] = $validated['comision']; // Mapear a mayúscula
+            unset($validated['comision']); // Borrar minúscula
         }
 
         $hotel->update($validated);
