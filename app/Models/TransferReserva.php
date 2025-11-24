@@ -14,10 +14,23 @@ class TransferReserva extends Model
     protected $primaryKey = "id_reserva";
 
     protected $fillable = [
-        'localizador','id_tipo_reserva','email_cliente','fecha_reserva','fecha_modificacion',
-        'id_destino','fecha_entrada','hora_entrada','numero_vuelo_entrada','origen_vuelo_entrada',
-        'fecha_vuelo_salida','hora_vuelo_salida','numero_vuelo_salida','hora_recogida',
-        'num_viajeros','id_vehiculo','status'
+        'localizador',
+        'id_tipo_reserva',
+        'email_cliente',
+        'fecha_reserva',
+        'fecha_modificacion',
+        'id_destino',
+        'fecha_entrada',
+        'hora_entrada',
+        'numero_vuelo_entrada',
+        'origen_vuelo_entrada',
+        'fecha_vuelo_salida',
+        'hora_vuelo_salida',
+        'numero_vuelo_salida',
+        'hora_recogida',
+        'num_viajeros',
+        'id_vehiculo',
+        'status'
     ];
 
     protected $casts = [
@@ -27,39 +40,33 @@ class TransferReserva extends Model
         'fecha_vuelo_salida' => 'date',
     ];
 
-    public function hotel()
-    {
-        return $this->belongsTo(TransferHotel::class, 'id_destino', 'id_hotel');
-    }
-
-
 
     public static function getReservasPorEmail($email)
     {
         return self::where('email_cliente', $email)
-                   ->where('status', '!=', 'cancelada')
-                   ->get();
+            ->where('status', '!=', 'cancelada')
+            ->get();
     }
 
     public static function getTodasReservas()
     {
         return self::where('status', '!=', 'cancelada')
-                   ->orderBy('fecha_reserva', 'desc')
-                   ->get();
+            ->orderBy('fecha_reserva', 'desc')
+            ->get();
     }
 
     public static function getReservasPorRango($inicio, $fin)
     {
         return self::where('status', '!=', 'cancelada')
-                   ->where(function($query) use ($inicio, $fin) {
-                       $query->whereBetween('fecha_entrada', [$inicio, $fin])
-                             ->orWhereBetween('fecha_vuelo_salida', [$inicio, $fin]);
-                   })
-                   ->with('hotel')
-                   ->orderBy('fecha_entrada')
-                   ->orderBy('hora_entrada')
-                   ->orderBy('fecha_vuelo_salida')
-                   ->get();
+            ->where(function ($query) use ($inicio, $fin) {
+                $query->whereBetween('fecha_entrada', [$inicio, $fin])
+                    ->orWhereBetween('fecha_vuelo_salida', [$inicio, $fin]);
+            })
+            ->with('hotel')
+            ->orderBy('fecha_entrada')
+            ->orderBy('hora_entrada')
+            ->orderBy('fecha_vuelo_salida')
+            ->get();
     }
 
 
@@ -78,9 +85,8 @@ class TransferReserva extends Model
         $email_cliente = null,
         $numero_vuelo_salida = null,
         $hora_recogida = null
-    )
-    {
-        
+    ) {
+
         if (!session()->has('user_id') || !session()->has('user_email')) {
             return false;
         }
@@ -89,10 +95,10 @@ class TransferReserva extends Model
         $localizador = uniqid("LOC-");
         $fecha_actual = now();
 
-     
-        if ($id_tipo_reserva == 1) { 
+
+        if ($id_tipo_reserva == 1) {
             $fecha_vuelo_salida = $hora_vuelo_salida = $numero_vuelo_salida = $hora_recogida = null;
-        } elseif ($id_tipo_reserva == 2) { 
+        } elseif ($id_tipo_reserva == 2) {
             $fecha_entrada = $hora_entrada = $numero_vuelo_entrada = $origen_vuelo_entrada = null;
         }
 
@@ -128,9 +134,9 @@ class TransferReserva extends Model
         $reserva->fill($datos);
         $reserva->fecha_modificacion = now();
 
-        if ($reserva->id_tipo_reserva == 1) { 
+        if ($reserva->id_tipo_reserva == 1) {
             $reserva->fecha_vuelo_salida = $reserva->hora_vuelo_salida = $reserva->numero_vuelo_salida = $reserva->hora_recogida = null;
-        } elseif ($reserva->id_tipo_reserva == 2) { 
+        } elseif ($reserva->id_tipo_reserva == 2) {
             $reserva->fecha_entrada = $reserva->hora_entrada = $reserva->numero_vuelo_entrada = $reserva->origen_vuelo_entrada = null;
         }
 
@@ -147,7 +153,7 @@ class TransferReserva extends Model
         return $reserva->save();
     }
 
- 
+
 
     public static function getReservaPorId($id_reserva)
     {
@@ -167,5 +173,32 @@ class TransferReserva extends Model
     public static function getReservasAdminIds()
     {
         return DB::table('reserva_admin')->pluck('id_reserva')->toArray();
+    }
+
+    // --- RELACIONES (Imprescindibles para que funcionen los 'with' en tus controladores) ---
+
+    // Relación con el Hotel 
+    public function hotel()
+    {
+        return $this->belongsTo(TransferHotel::class, 'id_hotel', 'id_hotel');
+    }
+
+    // Relación con el Vehículo
+    public function vehiculo()
+    {
+        return $this->belongsTo(TransferVehiculo::class, 'id_vehiculo', 'id_vehiculo');
+    }
+
+    // Relación con el Tipo de Reserva
+    public function tipo()
+    {
+
+        return $this->belongsTo(TransferTipoReserva::class, 'id_tipo_reserva', 'id_tipo_reserva');
+    }
+
+    // Relación con el Destino (que también es un hotel)
+    public function destino()
+    {
+        return $this->belongsTo(TransferHotel::class, 'id_destino', 'id_hotel');
     }
 }
