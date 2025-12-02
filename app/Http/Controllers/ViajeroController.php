@@ -14,7 +14,7 @@ class ViajeroController extends Controller
         $usuario = Auth::user();
         $mensaje = session('mensaje');
 
-        return view('user.my_profile', [
+        return view('usuario.perfil', [
             'usuario' => $usuario,
             'mensaje' => $mensaje,
         ]);
@@ -38,10 +38,10 @@ class ViajeroController extends Controller
         $exito = $usuario->update($data);
 
         if ($exito) {
-            return redirect()->route('perfil')
+            return redirect()->route('usuario.perfil')
                              ->with('mensaje', ProfileMessageHelper::EXITO_DATOS);
         } else {
-            return redirect()->route('perfil')
+            return redirect()->route('usuario.perfil')
                              ->with('mensaje', ProfileMessageHelper::ERROR_DATOS);
         }
     }
@@ -58,10 +58,10 @@ class ViajeroController extends Controller
         $exito = $usuario->save();
 
         if ($exito) {
-            return redirect()->route('perfil')
+            return redirect()->route('usuario.perfil')
                              ->with('mensaje', ProfileMessageHelper::EXITO_PASS);
         } else {
-            return redirect()->route('perfil')
+            return redirect()->route('usuario.perfil')
                              ->with('mensaje', ProfileMessageHelper::ERROR_BD_PASS);
         }
     }
@@ -70,7 +70,7 @@ class ViajeroController extends Controller
     {
         $usuario = Auth::user();
         if (!$usuario) {
-            return redirect()->route('auth.login');
+            return redirect()->route('login');
         }
 
         $exito = $usuario->delete();
@@ -80,10 +80,10 @@ class ViajeroController extends Controller
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('auth.login')
+            return redirect()->route('login')
                              ->with('mensaje', ProfileMessageHelper::EXITO_DELETE);
         } else {
-            return redirect()->route('perfil')
+            return redirect()->route('usuario.perfil')
                              ->with('mensaje', ProfileMessageHelper::ERROR_DELETE);
         }
     }
