@@ -7,15 +7,15 @@ use App\Http\Controllers\Api\ApiViajeroController;
 use App\Http\Controllers\Api\ApiZonaController;
 use App\Http\Controllers\Api\ApiReservaController;
 
-// 🌟 Autenticación API
+
 Route::post('/registro', [ApiAuthController::class, 'register']);
 Route::post('/login', [ApiAuthController::class, 'login']);
 Route::post('/logout', [ApiAuthController::class, 'logout'])->middleware('auth:sanctum');
 
-// 🚀 Rutas públicas
+
 Route::get('/zonas-stats', [ApiZonaController::class, 'index']);
 
-// 🔒 Rutas protegidas por token
+
 Route::middleware('auth:sanctum')->group(function() {
     // Usuario
     Route::get('/usuario/perfil', [ApiViajeroController::class, 'mostrarPerfil']);
