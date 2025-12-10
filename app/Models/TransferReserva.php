@@ -69,36 +69,33 @@ class TransferReserva extends Model
             ->get();
     }
 
-
-
     public static function crearReserva(
-        $id_tipo_reserva,
-        $id_destino,
-        $fecha_entrada = null,
-        $hora_entrada = null,
-        $num_viajeros = 1,
-        $id_vehiculo = null,
-        $numero_vuelo_entrada = null,
-        $origen_vuelo_entrada = null,
-        $fecha_vuelo_salida = null,
-        $hora_vuelo_salida = null,
-        $email_cliente = null,
-        $numero_vuelo_salida = null,
-        $hora_recogida = null
-    ) {
-
-        if (!session()->has('user_id') || !session()->has('user_email')) {
-            return false;
+    int $id_tipo_reserva,
+    int $id_destino,
+    ?string $fecha_entrada = null,
+    ?string $hora_entrada = null,
+    int $num_viajeros = 1,
+    ?int $id_vehiculo = null,
+    ?string $numero_vuelo_entrada = null,
+    ?string $origen_vuelo_entrada = null,
+    ?string $fecha_vuelo_salida = null,
+    ?string $hora_vuelo_salida = null,
+    string $email_cliente,
+    ?string $numero_vuelo_salida = null,
+    ?string $hora_recogida = null
+) {
+    try {
+        if (empty($email_cliente)) {
+            return false; // Email obligatorio
         }
 
-        $email_cliente = $email_cliente ?: session('user_email');
         $localizador = uniqid("LOC-");
         $fecha_actual = now();
 
-
-        if ($id_tipo_reserva == 1) {
+        // Ajustar campos según tipo de reserva
+        if ($id_tipo_reserva == 1) { // Solo llegada
             $fecha_vuelo_salida = $hora_vuelo_salida = $numero_vuelo_salida = $hora_recogida = null;
-        } elseif ($id_tipo_reserva == 2) {
+        } elseif ($id_tipo_reserva == 2) { // Solo salida
             $fecha_entrada = $hora_entrada = $numero_vuelo_entrada = $origen_vuelo_entrada = null;
         }
 
@@ -122,8 +119,12 @@ class TransferReserva extends Model
         ]);
 
         return $reserva ? $localizador : false;
-    }
 
+    } catch (\Exception $e) {
+        // Manejo seguro de error, no se muestra stack trace
+        return false;
+    }
+}
 
 
     public static function actualizarReserva($id_reserva, $datos)
