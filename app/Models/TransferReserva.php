@@ -86,16 +86,16 @@ class TransferReserva extends Model
 ) {
     try {
         if (empty($email_cliente)) {
-            return false; // Email obligatorio
+            return false; 
         }
 
         $localizador = uniqid("LOC-");
         $fecha_actual = now();
 
-        // Ajustar campos según tipo de reserva
-        if ($id_tipo_reserva == 1) { // Solo llegada
+    
+        if ($id_tipo_reserva == 1) { 
             $fecha_vuelo_salida = $hora_vuelo_salida = $numero_vuelo_salida = $hora_recogida = null;
-        } elseif ($id_tipo_reserva == 2) { // Solo salida
+        } elseif ($id_tipo_reserva == 2) { 
             $fecha_entrada = $hora_entrada = $numero_vuelo_entrada = $origen_vuelo_entrada = null;
         }
 
@@ -121,7 +121,6 @@ class TransferReserva extends Model
         return $reserva ? $localizador : false;
 
     } catch (\Exception $e) {
-        // Manejo seguro de error, no se muestra stack trace
         return false;
     }
 }
@@ -176,28 +175,25 @@ class TransferReserva extends Model
         return DB::table('reserva_admin')->pluck('id_reserva')->toArray();
     }
 
-    // --- RELACIONES (Imprescindibles para que funcionen los 'with' en tus controladores) ---
-
-    // Relación con el Hotel 
     public function hotel()
     {
         return $this->belongsTo(TransferHotel::class, 'id_hotel', 'id_hotel');
     }
 
-    // Relación con el Vehículo
+
     public function vehiculo()
     {
         return $this->belongsTo(TransferVehiculo::class, 'id_vehiculo', 'id_vehiculo');
     }
 
-    // Relación con el Tipo de Reserva
+
     public function tipo()
     {
 
         return $this->belongsTo(TransferTipoReserva::class, 'id_tipo_reserva', 'id_tipo_reserva');
     }
 
-    // Relación con el Destino (que también es un hotel)
+    
     public function destino()
     {
         return $this->belongsTo(TransferHotel::class, 'id_destino', 'id_hotel');

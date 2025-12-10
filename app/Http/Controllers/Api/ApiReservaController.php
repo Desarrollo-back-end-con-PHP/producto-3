@@ -72,11 +72,6 @@ class ApiReservaController extends Controller
         'localizador' => $localizador
     ]);
 }
-
-
-   
-
-
     public function misReservas()
     {
         $user = Auth::user();

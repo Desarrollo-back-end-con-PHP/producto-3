@@ -12,10 +12,9 @@ class ApiViajeroController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:sanctum'); // todas las rutas requieren token válido
+        $this->middleware('auth:sanctum'); 
     }
 
-    // Mostrar perfil del usuario
     public function mostrarPerfil()
     {
         $usuario = Auth::user();
@@ -25,7 +24,6 @@ class ApiViajeroController extends Controller
         ]);
     }
 
-    // Actualizar datos del usuario
     public function actualizarDatos(Request $request)
     {
         $usuario = Auth::user();
@@ -58,7 +56,7 @@ class ApiViajeroController extends Controller
         }
     }
 
-    // Actualizar contraseña del usuario
+ 
     public function actualizarContrasena(Request $request)
     {
         $usuario = Auth::user();
@@ -81,12 +79,11 @@ class ApiViajeroController extends Controller
     $usuario = Auth::user();
 
     try {
-        // Revocamos el token actual primero
+        
         $request->user()->currentAccessToken()->delete();
 
-        // Ahora eliminamos el usuario
+   
         $exito = $usuario->delete();
-
         return response()->json([
             'success' => $exito,
             'mensaje' => $exito ? ProfileMessageHelper::EXITO_DELETE : ProfileMessageHelper::ERROR_DELETE,
