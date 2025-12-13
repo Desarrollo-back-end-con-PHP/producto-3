@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Helpers\ProfileMessageHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -9,14 +10,17 @@ use Illuminate\Support\Facades\Hash;
 
 class ApiViajeroController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum'); 
+    }
+
     public function mostrarPerfil()
     {
         $usuario = Auth::user();
-        
         return response()->json([
-        'usuario' => $usuario,
-        'mensaje' => session('mensaje') ?? null,
-
+            'success' => true,
+            'usuario' => $usuario,
         ]);
     }
 
@@ -24,25 +28,35 @@ class ApiViajeroController extends Controller
     {
         $usuario = Auth::user();
 
-        $data = $request->validate([
-            'nombre'       => 'required|string|max:255',
-            'apellido1'    => 'required|string|max:255',
-            'apellido2'    => 'nullable|string|max:255',
-            'direccion'    => 'nullable|string|max:255',
-            'codigoPostal' => 'nullable|string|max:20',
-            'ciudad'       => 'nullable|string|max:255',
-            'pais'         => 'nullable|string|max:255',
-            'email'        => 'required|email|unique:transfer_viajeros,email,' . $usuario->id_viajero,
-        ]);
+        try {
+            $data = $request->validate([
+                'nombre'       => 'required|string|max:255',
+                'apellido1'    => 'required|string|max:255',
+                'apellido2'    => 'nullable|string|max:255',
+                'direccion'    => 'nullable|string|max:255',
+                'codigoPostal' => 'nullable|string|max:20',
+                'ciudad'       => 'nullable|string|max:255',
+                'pais'         => 'nullable|string|max:255',
+                'email'        => 'required|email|unique:transfer_viajeros,email,' . $usuario->id_viajero . ',id_viajero',
+            ]);
 
-        $exito = $usuario->update($data);
+            $exito = $usuario->update($data);
 
-        return response()->json([
-        'success' => $exito,
-        'mensaje' => $exito ? ProfileMessageHelper::EXITO_DATOS : ProfileMessageHelper::ERROR_DATOS,
-    ]);
+            return response()->json([
+                'success' => $exito,
+                'mensaje' => $exito ? ProfileMessageHelper::EXITO_DATOS : ProfileMessageHelper::ERROR_DATOS,
+                'usuario' => $usuario
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
+ 
     public function actualizarContrasena(Request $request)
     {
         $usuario = Auth::user();
@@ -55,34 +69,32 @@ class ApiViajeroController extends Controller
         $exito = $usuario->save();
 
         return response()->json([
-        'success' => $exito,
-        'mensaje' => $exito ? ProfileMessageHelper::EXITO_PASS : ProfileMessageHelper::ERROR_BD_PASS,]);
+            'success' => $exito,
+            'mensaje' => $exito ? ProfileMessageHelper::EXITO_PASS : ProfileMessageHelper::ERROR_BD_PASS,
+        ]);
     }
 
     public function eliminarUsuario(Request $request)
-    {
-        $usuario = Auth::user();
+{
+    $usuario = Auth::user();
 
-        if (!$usuario) {
-            return response()->json([
-                'success' => false,
-                'mensaje' => 'Usuario no autenticado'
-            ], 401);
-        }
+    try {
+        
+        $request->user()->currentAccessToken()->delete();
 
+   
         $exito = $usuario->delete();
-
-        if ($exito) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-        }
-
         return response()->json([
             'success' => $exito,
-            'mensaje' => $exito 
-                ? ProfileMessageHelper::EXITO_DELETE 
-                : ProfileMessageHelper::ERROR_DELETE,
+            'mensaje' => $exito ? ProfileMessageHelper::EXITO_DELETE : ProfileMessageHelper::ERROR_DELETE,
         ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
 }
