@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Hash;
 
 class ViajeroController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function mostrarPerfil()
     {
         $usuario = Auth::user();
@@ -24,26 +30,38 @@ class ViajeroController extends Controller
     {
         $usuario = Auth::user();
 
-        $data = $request->validate([
-            'nombre'       => 'required|string|max:255',
-            'apellido1'    => 'required|string|max:255',
-            'apellido2'    => 'nullable|string|max:255',
-            'direccion'    => 'nullable|string|max:255',
-            'codigoPostal' => 'nullable|string|max:20',
-            'ciudad'       => 'nullable|string|max:255',
-            'pais'         => 'nullable|string|max:255',
-            'email'        => 'required|email|unique:transfer_viajeros,email,' . $usuario->id_viajero,
-        ]);
+         try {
+            $data = $request->validate([
+                'nombre'       => 'required|string|max:100',
+                'apellido1'    => 'required|string|max:100',
+                'apellido2'    => 'nullable|string|max:100',
+                'direccion'    => 'nullable|string|max:100',
+                'codigoPostal' => 'nullable|string|max:100',
+                'ciudad'       => 'nullable|string|max:100',
+                'pais'         => 'nullable|string|max:100',
+                'email'        => 'required|email|max:100|unique:transfer_viajeros,email,' . $usuario->id_viajero . ',id_viajero',
+            ]);
 
+            $data = array_merge([
+                'apellido2'    => '',
+                'direccion'    => '',
+                'codigoPostal' => '',
+                'ciudad'       => '',
+                'pais'         => '',
+            ], $data);
+            
         $exito = $usuario->update($data);
 
-        if ($exito) {
-            return redirect()->route('usuario.perfil')
-                             ->with('mensaje', ProfileMessageHelper::EXITO_DATOS);
-        } else {
-            return redirect()->route('usuario.perfil')
-                             ->with('mensaje', ProfileMessageHelper::ERROR_DATOS);
-        }
+        return redirect()->route('usuario.perfil')
+                ->with('mensaje', $exito
+                    ? ProfileMessageHelper::EXITO_DATOS
+                    : ProfileMessageHelper::ERROR_DATOS
+                );
+
+    }catch (\Exception $e){
+        return redirect()->route('usuario.perfil')
+        ->with('mensaje', ProfileMessageHelper::ERROR_DATOS);
+    }
     }
 
     public function actualizarContrasena(Request $request)
@@ -57,34 +75,29 @@ class ViajeroController extends Controller
         $usuario->password = Hash::make($data['nueva_contrasena']);
         $exito = $usuario->save();
 
-        if ($exito) {
-            return redirect()->route('usuario.perfil')
-                             ->with('mensaje', ProfileMessageHelper::EXITO_PASS);
-        } else {
-            return redirect()->route('usuario.perfil')
-                             ->with('mensaje', ProfileMessageHelper::ERROR_BD_PASS);
-        }
+        return redirect()->route('usuario.perfil')
+            ->with('mensaje', $exito
+                ? ProfileMessageHelper::EXITO_PASS
+                : ProfileMessageHelper::ERROR_BD_PASS
+            );
     }
 
     public function eliminarUsuario(Request $request)
     {
         $usuario = Auth::user();
-        if (!$usuario) {
-            return redirect()->route('login');
-        }
-
-        $exito = $usuario->delete();
-
-        if ($exito) {
+        try {
             Auth::logout();
+            $usuario->delete();
+
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
             return redirect()->route('login')
-                             ->with('mensaje', ProfileMessageHelper::EXITO_DELETE);
-        } else {
+                ->with('mensaje', ProfileMessageHelper::EXITO_DELETE);
+
+        } catch (\Exception $e) {
             return redirect()->route('usuario.perfil')
-                             ->with('mensaje', ProfileMessageHelper::ERROR_DELETE);
+                ->with('mensaje', ProfileMessageHelper::ERROR_DELETE);
         }
     }
 }

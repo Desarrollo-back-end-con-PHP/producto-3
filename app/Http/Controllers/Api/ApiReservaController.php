@@ -35,13 +35,44 @@ class ApiReservaController extends Controller
 
     $user = Auth::user();
 
-    if (!$user->nombre || !$user->apellido1 || !$user->email ||
-        !$user->direccion || !$user->codigoPostal || !$user->ciudad || !$user->pais) {
-        return response()->json([
-            'success' => false,
-            'mensaje' => 'PROFILE_REQUIRED'
-        ], 403);
-    }
+    if ($user->email !== "admin@islatransfers.com" &&
+            (!$user->nombre || !$user->apellido1 || !$user->email ||
+             !$user->direccion || !$user->codigoPostal || !$user->ciudad || !$user->pais)) {
+
+            return response()->json([
+                'success' => false,
+                'mensaje' => 'PROFILE_REQUIRED'
+            ], 403);
+        }
+
+        // Cambiado: lógica admin para crear reserva de otro usuario
+        if ($user->email === "admin@islatransfers.com") {
+
+            if (!$request->email_cliente || !$request->codigo_admin) {
+                return response()->json([
+                    'success' => false,
+                    'mensaje' => 'Debes indicar email y código admin.'
+                ], 400);
+            }
+
+            $cliente = TransferViajero::where('email', $request->email_cliente)->first();
+
+            if (!$cliente ||
+                !$cliente->nombre || !$cliente->apellido1 || !$cliente->email ||
+                !$cliente->direccion || !$cliente->codigoPostal || !$cliente->ciudad || !$cliente->pais) {
+
+                return response()->json([
+                    'success' => false,
+                    'mensaje' => 'El perfil del cliente está incompleto.'
+                ], 400);
+            }
+
+            $emailCliente = $request->email_cliente;
+
+        } else {
+            $emailCliente = $user->email;
+        }
+
 
     $localizador = TransferReserva::crearReserva(
         $request->id_tipo_reserva,
@@ -54,7 +85,7 @@ class ApiReservaController extends Controller
         $request->origen_vuelo_entrada ?? null,
         $request->fecha_vuelo_salida ?? null,
         $request->hora_vuelo_salida ?? null,
-        $user->email,
+        $emailCliente,
         $request->numero_vuelo_salida ?? null,
         $request->hora_recogida ?? null
     );
@@ -75,7 +106,12 @@ class ApiReservaController extends Controller
     public function misReservas()
     {
         $user = Auth::user();
-        $reservas = TransferReserva::where('email_cliente', $user->email)->get();
+        if ($user->email === 'admin@islatransfers.com') {
+            $reservas = TransferReserva::all();
+        } else {
+            $reservas = TransferReserva::where('email_cliente', $user->email)->get();
+        }
+
         return response()->json(['reservas' => $reservas]);
     }
 
@@ -84,7 +120,8 @@ class ApiReservaController extends Controller
         $reserva = TransferReserva::findOrFail($id);
         $user = Auth::user();
 
-        if ($reserva->email_cliente !== $user->email) {
+         if ($user->email !== 'admin@islatransfers.com' &&
+            $reserva->email_cliente !== $user->email) {
             return response()->json(['success' => false, 'mensaje' => 'no_autorizado'], 403);
         }
 
@@ -100,7 +137,8 @@ class ApiReservaController extends Controller
         $reserva = TransferReserva::findOrFail($id);
         $user = Auth::user();
 
-        if ($reserva->email_cliente !== $user->email) {
+        if ($user->email !== 'admin@islatransfers.com' &&
+            $reserva->email_cliente !== $user->email) {
             return response()->json(['success' => false, 'mensaje' => 'no_autorizado'], 403);
         }
 
@@ -118,10 +156,10 @@ class ApiReservaController extends Controller
         $reserva = TransferReserva::findOrFail($id);
         $user = Auth::user();
 
-        if ($reserva->email_cliente !== $user->email) {
+        if ($user->email !== 'admin@islatransfers.com' &&
+            $reserva->email_cliente !== $user->email) {
             return response()->json(['success' => false, 'mensaje' => 'no_autorizado'], 403);
         }
-
         $reserva->delete();
 
         return response()->json([
