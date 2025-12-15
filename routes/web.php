@@ -33,9 +33,9 @@ Route::middleware('auth')->group(function () {
     //LOGOUT
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Ruta temporal para ver que el login funciona (Perfil)
+    // Ruta CORREGIDA para ver el perfil con diseño
     Route::get('/usuario/perfil', function () {
-        return "ESTAS EN TU PERFIL. Hola " . Auth::user()->nombre;
+        return view('users.perfil');
     })->name('usuario.perfil');
 });
 

@@ -16,7 +16,7 @@
             <i class="fas fa-calendar-plus me-2"></i> Nueva Reserva Corporativa
         </a>
         @else
-        <a href="#" class="btn btn-light btn-lg px-5 py-3 fw-bold">
+        <a href=""{{ route('hotel.login') }}"" class="btn btn-light btn-lg px-5 py-3 fw-bold">
             <i class="fas fa-calendar-check me-2"></i> ¡Reserva ahora!
         </a>
         @endauth
