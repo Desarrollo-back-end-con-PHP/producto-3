@@ -10,23 +10,11 @@ use Illuminate\Support\Facades\Hash;
 
 class ApiViajeroController extends Controller
 {
-    // 1. ELIMINAMOS O COMENTAMOS EL CONSTRUCTOR
-    // Dejaremos que las rutas (web.php y api.php) se encarguen de la seguridad.
-    /*
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum'); 
-    }
-    */
 
-    /**
-     * Muestra la VISTA del perfil (HTML)
-     */
     public function mostrarPerfil()
     {
         $usuario = Auth::user();
 
-        // 2. CAMBIO CLAVE: Devolvemos la vista (el archivo blade) en lugar de JSON
         return view('users.perfil', compact('usuario'));
     }
 
