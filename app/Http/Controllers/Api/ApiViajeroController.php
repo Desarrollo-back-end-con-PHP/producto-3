@@ -10,17 +10,45 @@ use Illuminate\Support\Facades\Hash;
 
 class ApiViajeroController extends Controller
 {
+    // IMPORTANTE: Constructor comentado para que no bloquee el acceso Web
+    /*
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum'); 
+    }
+    */
 
+    /**
+     * Muestra la vista del perfil WEB
+     */
     public function mostrarPerfil()
     {
         $usuario = Auth::user();
-
+        // Carga la vista que está en resources/views/users/perfil.blade.php
         return view('users.perfil', compact('usuario'));
     }
 
     /**
-     * Actualiza los datos (Devuelve JSON porque el formulario lo pide por AJAX o API)
+     * Cambia la contraseña desde el formulario WEB
      */
+    public function actualizarContrasenaWeb(Request $request)
+    {
+        $request->validate([
+            'nueva_contrasena' => 'required|string|min:8|confirmed',
+        ]);
+
+        $usuario = Auth::user();
+        $usuario->password = Hash::make($request->nueva_contrasena);
+        $usuario->save();
+
+        // Redirige atrás con mensaje de éxito
+        return back()->with('success_pass', 'Contraseña actualizada correctamente.');
+    }
+
+    // -------------------------------------------------------------------------
+    // MÉTODOS API (Mantienen el retorno JSON por si usas la App móvil o Postman)
+    // -------------------------------------------------------------------------
+
     public function actualizarDatos(Request $request)
     {
         $usuario = Auth::user();
@@ -34,14 +62,11 @@ class ApiViajeroController extends Controller
                 'codigoPostal' => 'nullable|string|max:20',
                 'ciudad'       => 'nullable|string|max:255',
                 'pais'         => 'nullable|string|max:255',
-                // Aseguramos que el email sea único, ignorando el id del usuario actual
                 'email'        => 'required|email|unique:transfer_viajeros,email,' . $usuario->id_viajero . ',id_viajero',
             ]);
 
             $exito = $usuario->update($data);
 
-            // Redirigimos de vuelta con un mensaje de éxito (para web)
-            // O devolvemos JSON si lo usas desde la App móvil. 
             return response()->json([
                 'success' => $exito,
                 'mensaje' => $exito ? ProfileMessageHelper::EXITO_DATOS : ProfileMessageHelper::ERROR_DATOS,
@@ -78,13 +103,11 @@ class ApiViajeroController extends Controller
         $usuario = Auth::user();
 
         try {
-            // Eliminamos tokens si existen
             if ($request->user()->currentAccessToken()) {
                 $request->user()->currentAccessToken()->delete();
             }
 
             $exito = $usuario->delete();
-            
             return response()->json([
                 'success' => $exito,
                 'mensaje' => $exito ? ProfileMessageHelper::EXITO_DELETE : ProfileMessageHelper::ERROR_DELETE,

@@ -9,6 +9,8 @@ use App\Http\Controllers\AdminReservaController;
 use App\Http\Controllers\AdminCalendarController;
 use App\Http\Controllers\HotelAuthController;
 use App\Http\Controllers\HotelPanelController;
+// 1. AÑADIDO: Importamos el controlador para Perfil y Contraseña
+use App\Http\Controllers\Api\ApiViajeroController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -17,7 +19,7 @@ Route::get('/', function () {
 // -------------------- RUTAS PÚBLICAS -----------------------------------
 //Rutas para invitados (NO han iniciado sesión)
 Route::middleware('guest')->group(function () {
-    //LOGGIN
+    //LOGIN
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/login', [AuthController::class, 'authenticate']);
 
@@ -33,10 +35,11 @@ Route::middleware('auth')->group(function () {
     //LOGOUT
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Ruta CORREGIDA para ver el perfil con diseño
-    Route::get('/usuario/perfil', function () {
-        return view('users.perfil');
-    })->name('usuario.perfil');
+    // 2. MODIFICADO: Apuntamos al controlador para ver DATOS + RESERVAS
+    Route::get('/usuario/perfil', [ApiViajeroController::class, 'mostrarPerfil'])->name('usuario.perfil');
+
+    // 3. AÑADIDO: Ruta para guardar la nueva contraseña
+    Route::post('/usuario/password', [ApiViajeroController::class, 'actualizarContrasenaWeb'])->name('usuario.password.update');
 });
 
 // ---------------------- RUTAS PROTEGIDAS ADMIN -------------------------------------
