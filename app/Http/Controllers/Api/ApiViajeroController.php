@@ -42,7 +42,6 @@ class ApiViajeroController extends Controller
 
             // Redirigimos de vuelta con un mensaje de éxito (para web)
             // O devolvemos JSON si lo usas desde la App móvil. 
-            // Para tu caso Web actual, lo ideal sería un redirect, pero mantengo JSON por si usas JS.
             return response()->json([
                 'success' => $exito,
                 'mensaje' => $exito ? ProfileMessageHelper::EXITO_DATOS : ProfileMessageHelper::ERROR_DATOS,
