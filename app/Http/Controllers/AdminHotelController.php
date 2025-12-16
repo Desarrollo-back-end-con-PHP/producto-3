@@ -28,30 +28,33 @@ class AdminHotelController extends Controller
      */
     public function store(Request $request)
     {
-        //comprobar los datos
+        // 1. Validación mejorada
         $validated = $request->validate([
-            'usuario' => 'required|string|max:100',
-            'password' => 'required|string|min:6',
-            'comision' => 'nullable|integer|min:0|max:100',
+            // Añadido 'unique' para que no haya dos usuarios iguales
+            'usuario' => 'required|string|max:100|unique:transfer_hotels,usuario',
+            'password' => 'required|string|min:4',
+            'comision' => 'nullable|numeric|min:0',
             'id_zona' => 'required|exists:transfer_zonas,id_zona',
         ]);
 
-        //encriptarContraseña
+        // 2. Encriptar Contraseña
         $validated['password'] = \Illuminate\Support\Facades\Hash::make($validated['password']);
 
-        //marcar como activo
+        // 3. Estado activo por defecto
         $validated['status'] = 'activo';
 
-        if (isset($validated['comision'])) {
-            $validated['Comision'] = $validated['comision'];
-            unset($validated['comision']); // Borramos la minúscula para limpiar
-        }
+        // 4. Mapeo de Comisión (Con valor por defecto de 10€ según rúbrica)
+        // Si viene en el request lo usa, si no, pone 10.
+        $validated['Comision'] = $request->input('comision', 10);
+        
+        // Limpiamos la variable minúscula si existía para que no falle el insert
+        unset($validated['comision']); 
 
-        //Guardar, hace un INSERT
-        \App\Models\TransferHotel::create($validated);
+        // 5. Guardar
+        TransferHotel::create($validated);
 
         return redirect()->route('admin.hoteles.index')
-            ->with('success', 'Hotel creado correctamente');
+            ->with('success', 'Hotel creado correctamente.');
     }
 
     /**

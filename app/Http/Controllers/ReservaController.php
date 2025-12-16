@@ -45,7 +45,15 @@ class ReservaController extends Controller
             'num_viajeros'    => 'required|integer|min:1',
         ]);
 
-        $user = Auth::user();
+         $user = Auth::user();
+
+        if ($user->email !== "admin@islatransfers.com" &&
+            (!$user->nombre || !$user->apellido1 || !$user->email ||
+             !$user->direccion || !$user->codigoPostal || !$user->ciudad || !$user->pais)) {
+
+            return redirect()->route('usuario.perfil')
+                ->with('mensaje', 'Debes completar todos los datos de tu perfil antes de hacer una reserva.');
+        }
 
         if ($user->email === "admin@islatransfers.com") {
 
@@ -55,36 +63,33 @@ class ReservaController extends Controller
 
             $cliente = TransferViajero::where('email', $request->email_cliente)->first();
 
-            if (!$cliente || !$cliente->perfil_completo) {
+            if (!$cliente ||
+                !$cliente->nombre || !$cliente->apellido1 || !$cliente->email ||
+                !$cliente->direccion || !$cliente->codigoPostal || !$cliente->ciudad || !$cliente->pais) {
+                
                 return back()->with('mensaje_error', 'El perfil del cliente está incompleto.');
             }
 
             $emailCliente = $request->email_cliente;
-        
 
         } else {
             $emailCliente = $user->email;
-
-            if (!$user->perfil_completo) {
-                return redirect()
-                    ->route('usuario.perfil')
-                    ->with('mensaje', 'PROFILE_REQUIRED');
-            }
         }
+
 
         TransferReserva::create([
             'id_tipo_reserva'      => $request->id_tipo_reserva,
             'id_destino'           => $request->id_destino,
             'num_viajeros'         => $request->num_viajeros,
-            'id_vehiculo'          => $request->id_vehiculo,
-            'fecha_entrada'        => $request->fecha_entrada,
-            'hora_entrada'         => $request->hora_entrada,
-            'numero_vuelo_entrada' => $request->numero_vuelo_entrada,
-            'origen_vuelo_entrada' => $request->origen_vuelo_entrada,
-            'fecha_vuelo_salida'   => $request->fecha_vuelo_salida,
-            'hora_vuelo_salida'    => $request->hora_vuelo_salida,
-            'numero_vuelo_salida'  => $request->numero_vuelo_salida,
-            'hora_recogida'        => $request->hora_recogida,
+            'id_vehiculo'          => $request->id_vehiculo ?? null,
+            'fecha_entrada'        => $request->fecha_entrada ?? '',
+            'hora_entrada'         => $request->hora_entrada ?? '',
+            'numero_vuelo_entrada' => $request->numero_vuelo_entrada ?? '',
+            'origen_vuelo_entrada' => $request->origen_vuelo_entrada ?? '',
+            'fecha_vuelo_salida'   => $request->fecha_vuelo_salida ?? '',
+            'hora_vuelo_salida'    => $request->hora_vuelo_salida ?? '',
+            'numero_vuelo_salida'  => $request->numero_vuelo_salida ?? '',
+            'hora_recogida'        => $request->hora_recogida ?? '',
             'email_cliente'        => $emailCliente,
         ]);
 

@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\TransferReserva;
+use App\Models\TransferZona;
+use App\Models\TransferTipoReserva;
+use App\Models\TransferVehiculo;
+use App\Models\TransferHotel;
 
 class HotelPanelController extends Controller
 {
@@ -13,24 +17,33 @@ class HotelPanelController extends Controller
      */
     public function index()
     {
-        //  Identificar hotel. Usamos el guard específico 'hotel'.
         $hotel = Auth::guard('hotel')->user();
+        $comisionPorReserva = $hotel->Comision ?? 10;
 
-        // Buscamos en transfer_reservas dódne el id_hotel coincida
+        // 1. Buscamos reservas históricas para el listado
         $reservas = TransferReserva::query()
             ->where('id_hotel', $hotel->id_hotel)
-            ->with(['vehiculo', 'tipo'])
-            ->orderBy('fecha_reserva', 'desc') // Las más recientes primero
-            ->get();
+            ->with(['vehiculo', 'tipo', 'destino']) // Añadido destino para verlo en la tabla
+            ->orderBy('fecha_reserva', 'desc')
+            ->paginate(10); // Usamos paginación para que no sea infinito
 
-        // Calcular comisiones
-        $totalReservas = $reservas->count();
-        $comisionPorReserva = $hotel->Comision;
+        // 2. RÚBRICA: Calcular comisión ESPECÍFICA de "Este Mes"
+        $reservasEsteMes = TransferReserva::where('id_hotel', $hotel->id_hotel)
+            ->where('status', '!=', 'cancelada')
+            ->whereMonth('fecha_reserva', now()->month)
+            ->whereYear('fecha_reserva', now()->year)
+            ->count();
 
-        $totalComisiones = $totalReservas * $comisionPorReserva;
+        $comisionMensual = $reservasEsteMes * $comisionPorReserva;
 
+        // 3. Comisión Total Histórica (Opcional, pero queda bien)
+        $totalReservasHist = TransferReserva::where('id_hotel', $hotel->id_hotel)
+             ->where('status', '!=', 'cancelada')
+             ->count();
+        $totalComisiones = $totalReservasHist * $comisionPorReserva;
 
-        return view('hotel.dashboard', compact('hotel', 'reservas', 'totalComisiones'));
+        // ASEGÚRATE de que la vista existe en resources/views/hotel/dashboard.blade.php
+        return view('hotel.dashboard', compact('hotel', 'reservas', 'comisionMensual', 'totalComisiones'));
     }
 
     /**
@@ -38,12 +51,13 @@ class HotelPanelController extends Controller
      */
     public function createReserva()
     {
-        // obtenemos las zonas, tipos de reserva i vehículos
-        $zonas = \App\Models\TransferZona::all();
-        $tipos = \App\Models\TransferTipoReserva::all();
-        $vehiculos = \App\Models\TransferVehiculo::all();
-        // obtenemos la lista de hoteles DESTINO (excluyendo al propio hotel origen)
-        $hotelesDestino = \App\Models\TransferHotel::where('id_hotel', '!=', Auth::guard('hotel')->id())->get();
+        $zonas = TransferZona::all();
+        $tipos = TransferTipoReserva::all();
+        $vehiculos = TransferVehiculo::all();
+        
+        // CORRECCIÓN: Quitamos el filtro '!='. 
+        // Un hotel SÍ puede querer reservar un transfer HACIA sí mismo (Aeropuerto -> Mi Hotel)
+        $hotelesDestino = TransferHotel::where('status', 'activo')->orderBy('usuario')->get();
 
         return view('hotel.reservas.create', compact('zonas', 'tipos', 'vehiculos', 'hotelesDestino'));
     }
@@ -53,46 +67,34 @@ class HotelPanelController extends Controller
      */
     public function store(Request $request)
     {
-        // VALIDACIÓN
         $validated = $request->validate([
-            'email_cliente' => 'required|email|exists:transfer_viajeros,email', //el email debe existir en la tabla viajeros sino se solicitará que se registre
+            'email_cliente' => 'required|email|max:100', 
             'id_tipo_reserva' => 'required|exists:transfer_tipo_reservas,id_tipo_reserva',
-            'id_destino' => 'required|exists:transfer_hotels,id_hotel', // El destino debe ser un hotel válido
-            'id_vehiculo' => 'required|exists:transfer_vehiculo,id_vehiculo',
-            'fecha_entrada' => 'required|date|after:today', // Fecha futura
+            'id_destino' => 'required|exists:transfer_hotels,id_hotel',
+            'id_vehiculo' => 'required|exists:transfer_vehiculos,id_vehiculo', 
+            'fecha_entrada' => 'required|date|after_or_equal:today', // after_or_equal permite reservas para hoy mismo
             'hora_entrada' => 'required',
             'num_viajeros' => 'required|integer|min:1|max:50',
             'numero_vuelo_entrada' => 'nullable|string|max:50',
             'origen_vuelo_entrada' => 'nullable|string|max:50',
         ]);
 
-        // Obtenemos el ID del hotel que está logueado en este momento.
-        // Así aseguramos que la comisión vaya al hotel correcto y no a otro.
         $idHotelLogueado = Auth::guard('hotel')->id();
-
-        //GENERAR LOCALIZADOR ÚNICO
         $localizador = 'HTL-' . strtoupper(substr(md5(uniqid()), 0, 6));
 
-        //GUARDAR EN BASE DE DATOS
         TransferReserva::create([
             'localizador' => $localizador,
-
-            // Aquí asignamos la reserva a ESTE hotel (para su comisión)
-            'id_hotel' => $idHotelLogueado,
-
+            'id_hotel' => $idHotelLogueado, // <--- CLAVE: El hotel logueado se lleva la comisión
             'email_cliente' => $validated['email_cliente'],
             'id_tipo_reserva' => $validated['id_tipo_reserva'],
             'id_destino' => $validated['id_destino'],
             'id_vehiculo' => $validated['id_vehiculo'],
-
             'fecha_reserva' => now(),
-            'fecha_modificacion' => now(),
-
+            'fecha_modificacion' => now(), 
             'fecha_entrada' => $validated['fecha_entrada'],
             'hora_entrada' => $validated['hora_entrada'],
             'numero_vuelo_entrada' => $validated['numero_vuelo_entrada'] ?? null,
             'origen_vuelo_entrada' => $validated['origen_vuelo_entrada'] ?? null,
-
             'num_viajeros' => $validated['num_viajeros'],
             'status' => 'confirmada'
         ]);

@@ -10,19 +10,44 @@ use Illuminate\Support\Facades\Hash;
 
 class ApiViajeroController extends Controller
 {
+    // IMPORTANTE: Constructor comentado para que no bloquee el acceso Web
+    /*
     public function __construct()
     {
         $this->middleware('auth:sanctum'); 
     }
+    */
 
+    /**
+     * Muestra la vista del perfil WEB
+     */
     public function mostrarPerfil()
     {
         $usuario = Auth::user();
-        return response()->json([
-            'success' => true,
-            'usuario' => $usuario,
-        ]);
+        // Carga la vista que está en resources/views/users/perfil.blade.php
+        return view('users.perfil', compact('usuario'));
     }
+
+    /**
+     * Cambia la contraseña desde el formulario WEB
+     */
+    public function actualizarContrasenaWeb(Request $request)
+    {
+        $request->validate([
+            'nueva_contrasena' => 'required|string|min:8|confirmed',
+        ]);
+
+        $usuario = Auth::user();
+        $usuario->password = Hash::make($request->nueva_contrasena);
+        $usuario->save();
+
+        // Redirige atrás con mensaje de éxito
+        return back()->with('success_pass', 'Contraseña actualizada correctamente.');
+    }
+
+    // -------------------------------------------------------------------------
+    // MÉTODOS API (Mantienen el retorno JSON por si usas la App móvil o Postman)
+    // -------------------------------------------------------------------------
 
     public function actualizarDatos(Request $request)
     {
@@ -56,7 +81,6 @@ class ApiViajeroController extends Controller
         }
     }
 
- 
     public function actualizarContrasena(Request $request)
     {
         $usuario = Auth::user();
@@ -75,26 +99,25 @@ class ApiViajeroController extends Controller
     }
 
     public function eliminarUsuario(Request $request)
-{
-    $usuario = Auth::user();
+    {
+        $usuario = Auth::user();
 
-    try {
-        
-        $request->user()->currentAccessToken()->delete();
+        try {
+            if ($request->user()->currentAccessToken()) {
+                $request->user()->currentAccessToken()->delete();
+            }
 
-   
-        $exito = $usuario->delete();
-        return response()->json([
-            'success' => $exito,
-            'mensaje' => $exito ? ProfileMessageHelper::EXITO_DELETE : ProfileMessageHelper::ERROR_DELETE,
-        ]);
+            $exito = $usuario->delete();
+            return response()->json([
+                'success' => $exito,
+                'mensaje' => $exito ? ProfileMessageHelper::EXITO_DELETE : ProfileMessageHelper::ERROR_DELETE,
+            ]);
 
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'error' => $e->getMessage()
-        ], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-}
-
 }
