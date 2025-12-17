@@ -81,26 +81,35 @@ class AdminViajeroController extends Controller
         $viajero = TransferViajero::where('id_viajero', $id)->firstOrFail();
 
         $data = $request->validate([
-            'nombre'    => 'required|string|max:100',
-            'apellido1' => 'required|string|max:100',
-            // Validación unique: ignora el email de ESTE usuario (usando id_viajero)
-            'email'     => [
-                'required', 
-                'email', 
-                'max:100', 
-                Rule::unique('transfer_viajeros')->ignore($viajero->id_viajero, 'id_viajero')
+            'nombre'       => 'required|string|max:100',
+            'apellido1'    => 'required|string|max:100',
+            'apellido2'    => 'nullable|string|max:100', // Validamos que puede ser nullable
+            'email'        => [
+                'required', 'email', 'max:100',
+                \Illuminate\Validation\Rule::unique('transfer_viajeros')->ignore($viajero->id_viajero, 'id_viajero')
             ],
-            'password'  => 'nullable|string|min:8', // Opcional
+            'direccion'    => 'nullable|string|max:255',
+            'codigoPostal' => 'nullable|string|max:20',
+            'ciudad'       => 'nullable|string|max:100',
+            'pais'         => 'nullable|string|max:100',
+            'password'     => 'nullable|string|min:8',
         ]);
 
-        $viajero->nombre = $data['nombre'];
+        // Asignación de datos básicos
+        $viajero->nombre    = $data['nombre'];
         $viajero->apellido1 = $data['apellido1'];
-        $viajero->apellido2 = $request->apellido2;
-        $viajero->email = $data['email'];
+        $viajero->apellido2 = $request->apellido2 ?? ''; 
+        $viajero->email     = $data['email'];
 
-        // Solo actualizamos contraseña si escribieron algo
+        // Asignación de datos de dirección (con fallback a '' si la BD no acepta null)
+        $viajero->direccion    = $request->direccion ?? '';
+        $viajero->codigoPostal = $request->codigoPostal ?? '';
+        $viajero->ciudad       = $request->ciudad ?? '';
+        $viajero->pais         = $request->pais ?? '';
+
+        // Contraseña (solo si se escribió una nueva)
         if ($request->filled('password')) {
-            $viajero->password = Hash::make($data['password']);
+            $viajero->password = \Illuminate\Support\Facades\Hash::make($data['password']);
         }
 
         $viajero->save();

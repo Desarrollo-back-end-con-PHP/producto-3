@@ -1,4 +1,4 @@
-@extends('layouts.admin') {{-- 1. AQUÍ ESTÁ EL CAMBIO PRINCIPAL --}}
+@extends('layouts.admin')
 
 @section('title', 'Panel de Administración')
 
