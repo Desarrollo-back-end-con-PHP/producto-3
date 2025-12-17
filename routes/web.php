@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function () {
 
     // 2. MODIFICADO: Apuntamos al controlador para ver DATOS + RESERVAS
     Route::get('/usuario/perfil', [ViajeroController::class, 'mostrarPerfil'])->name('usuario.perfil');
+    Route::post('/usuario/datos', [ViajeroController::class, 'actualizarDatos'])->name('usuario.datos.update');
     // 3. AÑADIDO: Ruta para guardar la nueva contraseña
     Route::post('/usuario/password', [ViajeroController::class, 'actualizarContrasena'])->name('usuario.password.update');
     // Formulario para crear nueva reserva
