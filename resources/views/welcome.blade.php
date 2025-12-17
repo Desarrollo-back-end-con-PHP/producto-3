@@ -11,14 +11,33 @@
         <h1 class="display-3 fw-bold mb-4">Bienvenido a Isla Transfers</h1>
         <p class="fs-4 mb-5 col-md-8 mx-auto">Tu servicio de traslados en la isla. Puntual, fiable y sin complicaciones.</p>
 
+        {{-- LÓGICA DE REDIRECCIÓN DINÁMICA --}}
+        
+        {{-- 1. Si es un HOTEL (Guard hotel) --}}
         @auth('hotel')
-        <a href="{{ route('hotel.reservas.create') }}" class="btn btn-light btn-lg px-5 py-3 fw-bold">
-            <i class="fas fa-calendar-plus me-2"></i> Nueva Reserva Corporativa
-        </a>
+            <a href="{{ route('hotel.reservas.create') }}" class="btn btn-light btn-lg px-5 py-3 fw-bold">
+                <i class="fas fa-calendar-plus me-2"></i> Nueva Reserva Corporativa
+            </a>
+
+        {{-- 2. Si es un VIAJERO o ADMIN (Guard web) --}}
+        @elseauth('web')
+            @if(str_ends_with(Auth::user()->email, '@islatransfers.com'))
+                {{-- Botón para cualquier ADMINISTRADOR --}}
+                <a href="{{ route('admin.dashboard') }}" class="btn btn-warning btn-lg px-5 py-3 fw-bold text-dark">
+                    <i class="fas fa-tachometer-alt me-2"></i> Panel de Administración
+                </a>
+            @else
+                {{-- Botón para USUARIO NORMAL --}}
+                <a href="{{ route('reservas.create') }}" class="btn btn-light btn-lg px-5 py-3 fw-bold">
+                    <i class="fas fa-calendar-check me-2"></i> ¡Reserva ahora!
+                </a>
+            @endif
+
+        {{-- 3. Si es un INVITADO (No logueado) --}}
         @else
-        <a href=""{{ route('hotel.login') }}"" class="btn btn-light btn-lg px-5 py-3 fw-bold">
-            <i class="fas fa-calendar-check me-2"></i> ¡Reserva ahora!
-        </a>
+            <a href="{{ route('login') }}" class="btn btn-light btn-lg px-5 py-3 fw-bold">
+                <i class="fas fa-sign-in-alt me-2"></i> Iniciar Sesión para Reservar
+            </a>
         @endauth
     </div>
 </div>
