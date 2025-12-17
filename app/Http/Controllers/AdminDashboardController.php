@@ -19,8 +19,8 @@ class AdminDashboardController extends Controller
         // Tabla de Próximas Reservas
         $reservas = TransferReserva::query()
             ->with(['hotel', 'destino'])
-            ->whereDate('fecha_entrada', '>=', now())
-            ->orderBy('fecha_entrada', 'asc')
+            //->whereDate('fecha_entrada', '>=', now())
+            ->orderBy('fecha_entrada', 'desc')
             ->take(10)
             ->get();
 

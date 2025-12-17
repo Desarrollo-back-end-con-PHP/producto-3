@@ -10,12 +10,9 @@
         <h1 class="display-6 fw-bold">Panel de Administración</h1>
 
         <div>
-            {{-- Botón para ir al CALENDARIO --}}
             <a href="{{ route('admin.calendar') }}" class="btn btn-primary me-2 shadow-sm">
                 <i class="fa fa-calendar-alt"></i> Ver Calendario
             </a>
-
-            {{-- Botón para ir al REPORTE DE COMISIONES --}}
             <a href="{{ route('admin.comisiones') }}" class="btn btn-success shadow-sm">
                 <i class="fa fa-chart-line"></i> Comisiones
             </a>
@@ -65,6 +62,7 @@
                         <tr>
                             <th>Localizador</th>
                             <th>Fecha</th>
+                            <th>Hora</th> {{-- NUEVA COLUMNA --}}
                             <th>Origen</th>
                             <th>Destino</th>
                             <th>Cliente</th>
@@ -76,7 +74,13 @@
                             @foreach($reservas as $reserva)
                             <tr>
                                 <td class="fw-bold">{{ $reserva->localizador }}</td>
-                                <td>{{ \Carbon\Carbon::parse($reserva->fecha_entrada)->format('d/m/Y H:i') }}</td>
+
+                                {{-- COLUMNA FECHA --}}
+                                <td>{{ \Carbon\Carbon::parse($reserva->fecha_entrada)->format('d/m/Y') }}</td>
+
+                                {{-- COLUMNA HORA (Separada) --}}
+                                <td>{{ \Carbon\Carbon::parse($reserva->hora_entrada)->format('H:i') }}</td>
+
                                 <td>
                                     @if($reserva->id_tipo_reserva == 2 && $reserva->hotel)
                                         {{ $reserva->hotel->usuario }}
@@ -97,7 +101,7 @@
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="6" class="text-center text-muted">No hay reservas recientes.</td>
+                                <td colspan="7" class="text-center text-muted">No hay reservas recientes.</td>
                             </tr>
                         @endif
                     </tbody>
