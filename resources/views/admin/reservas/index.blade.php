@@ -55,10 +55,14 @@
                             <th>Origen / Creador</th>
                             <th>Cliente</th>
                             <th>Estado</th>
+                            <th>Creado Por</th> 
                             <th class="text-end">Comisión</th>
                             <th class="text-center">Acciones</th> {{-- Nueva columna --}}
                         </tr>
                     </thead>
+                    @php
+                    $idsAdmin = \App\Models\TransferReserva::getReservasAdminIds();
+                    @endphp
                     <tbody>
                         @forelse($reservas as $reserva)
                         <tr>
@@ -81,7 +85,14 @@
                                     {{ ucfirst($reserva->status) }}
                                 </span>
                             </td>
-
+                            {{-- NUEVA COLUMNA: Creado Por --}}
+                            <td>
+                                @if(in_array($reserva->id_reserva, $idsAdmin))
+                                <span class="badge bg-warning text-dark">Admin</span>
+                                @else
+                                <span class="badge bg-success">Usuario</span>
+                                @endif
+                            </td>
                             <td class="text-end fw-bold">
                                 @if($reserva->hotel && $reserva->status != 'cancelada')
                                 <span class="text-success">+ {{ $reserva->hotel->Comision }} €</span>

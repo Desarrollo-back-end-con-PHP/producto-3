@@ -160,6 +160,9 @@
                             <h4 class="mb-4 text-primary"><i class="fas fa-suitcase-rolling me-2"></i>Mis Reservas</h4>
 
                             @if (isset($reservas) && $reservas->count() > 0)
+                            @php
+                            $idsAdmin = \App\Models\TransferReserva::getReservasAdminIds();
+                            @endphp
                                 <div class="table-responsive">
                                     <table class="table table-hover table-bordered align-middle shadow-sm">
                                         <thead class="table-light">
@@ -168,6 +171,7 @@
                                                 <th>Fecha Entrada</th>
                                                 <th>Origen</th>
                                                 <th>Estado</th>
+                                                <th>Creado Por</th>
                                                 <th class="text-center">Acciones</th>
                                             </tr>
                                         </thead>
@@ -194,6 +198,13 @@
                                                         @else
                                                             <span
                                                                 class="badge bg-warning text-dark">{{ $reserva->status }}</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if(in_array($reserva->id_reserva, $idsAdmin))
+                                                        <span class="badge bg-warning text-dark">Admin</span>
+                                                        @else
+                                                        <span class="badge bg-success">Usuario</span>
                                                         @endif
                                                     </td>
                                                     <td class="text-center">

@@ -111,8 +111,19 @@ class ReservaController extends Controller
 
 public function misReservas()
 {
-    return redirect()->route('usuario.perfil');
+    $user = Auth::user();
+
+    if ($user->email === 'admin@islatransfers.com') {
+        $reservas = TransferReserva::all();
+    } else {
+        $reservas = TransferReserva::where('email_cliente', $user->email)->get();
+    }
+
+    return view('users.reservas.mis_reservas', [
+        'reservas' => $reservas
+    ]);
 }
+
 
     public function edit($id)
     {
@@ -154,7 +165,7 @@ public function misReservas()
             ->with('mensaje', 'actualizado_ok');
     }
 
-    // Esta función es para BORRAR completamente (quizás solo admins)
+  
     public function cancel($id)
     {
         $reserva = TransferReserva::findOrFail($id);
