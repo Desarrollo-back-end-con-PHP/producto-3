@@ -37,7 +37,7 @@ class ApiReservaController extends Controller
 
     $user = Auth::user();
 
-    // Validación perfil usuario normal
+
     if ($user->email !== "admin@islatransfers.com" &&
         (!$user->nombre || !$user->apellido1 || !$user->email ||
          !$user->direccion || !$user->codigoPostal || !$user->ciudad || !$user->pais)) {
@@ -47,7 +47,6 @@ class ApiReservaController extends Controller
         ], 403);
     }
 
-    // Determinar email del cliente
     if ($user->email === "admin@islatransfers.com") {
         if (!$request->email_cliente || !$request->codigo_admin) {
             return response()->json([
@@ -98,7 +97,6 @@ class ApiReservaController extends Controller
         ], 500);
     }
 
-    // Si es admin, guardar en tabla reserva_admin
     if ($user->email === "admin@islatransfers.com") {
         $reserva = TransferReserva::where('localizador', $localizador)->first();
 
@@ -108,14 +106,13 @@ class ApiReservaController extends Controller
         ]);
     }
 
-    // Devolver localizador
+   
     return response()->json([
         'success' => true,
         'mensaje' => ProfileMessageHelper::EXITO_RESERVA,
         'localizador' => $localizador,
     ]);
 }
-
     
     
         public function misReservasApi()
