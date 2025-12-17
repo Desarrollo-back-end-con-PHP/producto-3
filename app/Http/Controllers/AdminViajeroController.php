@@ -52,7 +52,11 @@ class AdminViajeroController extends Controller
             'apellido2' => $request->apellido2, // Opcional
             'email'     => $data['email'],
             'password'  => Hash::make($data['password']),
-            'status'    => 1, // Asumimos 1 como activo por defecto
+            'status'    => 1,
+            'direccion'    => '', 
+            'ciudad'       => '', 
+            'pais'         => '', 
+            'codigoPostal' => '', 
         ]);
 
         return redirect()->route('admin.viajeros.index')

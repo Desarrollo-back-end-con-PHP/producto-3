@@ -15,6 +15,8 @@ class TransferViajero extends Authenticatable
 
     protected $table = 'transfer_viajeros';
     protected $primaryKey = 'id_viajero';
+    const CREATED_AT = 'fecha_creacion';
+    const UPDATED_AT = null;
 
     protected $fillable = [
         'nombre',

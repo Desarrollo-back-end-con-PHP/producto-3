@@ -22,15 +22,9 @@ class ViajeroController extends Controller
         $mensaje = session('mensaje');
 
         $reservas = TransferReserva::where('email_cliente', $usuario->email)
-                        ->orderBy('fecha_reserva', 'desc')
-                        ->get();
+            ->orderBy('fecha_reserva', 'desc')
+            ->get();
 
-        //dd([
-        //    'Tu Email (Logueado)' => $usuario->email,
-        //    'Cantidad Reservas Encontradas' => $reservas->count(),
-        //    'Datos de la primera reserva' => $reservas->first(),
-        //    'SQL Ejecutado' => \App\Models\TransferReserva::where('email_cliente', $usuario->email)->toSql()
-        //]);
 
         return view('users.perfil', [
             'usuario' => $usuario,
@@ -43,38 +37,32 @@ class ViajeroController extends Controller
     {
         $usuario = Auth::user();
 
-         try {
-            $data = $request->validate([
-                'nombre'       => 'required|string|max:100',
-                'apellido1'    => 'required|string|max:100',
-                'apellido2'    => 'nullable|string|max:100',
-                'direccion'    => 'nullable|string|max:100',
-                'codigoPostal' => 'nullable|string|max:100',
-                'ciudad'       => 'nullable|string|max:100',
-                'pais'         => 'nullable|string|max:100',
-                'email'        => 'required|email|max:100|unique:transfer_viajeros,email,' . $usuario->id_viajero . ',id_viajero',
-            ]);
+        $data = $request->validate([
+            'nombre'       => 'required|string|max:100',
+            'apellido1'    => 'required|string|max:100',
+            'apellido2'    => 'nullable|string|max:100',
+            'direccion'    => 'nullable|string|max:100',
+            'codigoPostal' => 'nullable|string|max:100',
+            'ciudad'       => 'nullable|string|max:100',
+            'pais'         => 'nullable|string|max:100',
+            'email'        => 'required|email|max:100|unique:transfer_viajeros,email,' . $usuario->id_viajero . ',id_viajero',
+        ]);
 
-            $data = array_merge([
-                'apellido2'    => '',
-                'direccion'    => '',
-                'codigoPostal' => '',
-                'ciudad'       => '',
-                'pais'         => '',
-            ], $data);
+        $data['apellido2']    = $data['apellido2'] ?? '';
+        $data['direccion']    = $data['direccion'] ?? '';
+        $data['codigoPostal'] = $data['codigoPostal'] ?? '';
+        $data['ciudad']       = $data['ciudad'] ?? '';
+        $data['pais']         = $data['pais'] ?? '';
 
-        $exito = $usuario->update($data);
+        try {
+            $usuario->update($data);
 
-        return redirect()->route('usuario.perfil')
-                ->with('mensaje', $exito
-                    ? ProfileMessageHelper::EXITO_DATOS
-                    : ProfileMessageHelper::ERROR_DATOS
-                );
-
-    }catch (\Exception $e){
-        return redirect()->route('usuario.perfil')
-        ->with('mensaje', ProfileMessageHelper::ERROR_DATOS);
-    }
+            return redirect()->route('usuario.perfil')
+                ->with('mensaje', ProfileMessageHelper::EXITO_DATOS);
+        } catch (\Exception $e) {
+            return redirect()->route('usuario.perfil')
+                ->with('mensaje', 'ERROR SQL: ' . $e->getMessage());
+        }
     }
 
     public function actualizarContrasena(Request $request)
@@ -89,9 +77,11 @@ class ViajeroController extends Controller
         $exito = $usuario->save();
 
         return redirect()->route('usuario.perfil')
-            ->with('mensaje', $exito
-                ? ProfileMessageHelper::EXITO_PASS
-                : ProfileMessageHelper::ERROR_BD_PASS
+            ->with(
+                'mensaje',
+                $exito
+                    ? ProfileMessageHelper::EXITO_PASS
+                    : ProfileMessageHelper::ERROR_BD_PASS
             );
     }
 
@@ -107,7 +97,6 @@ class ViajeroController extends Controller
 
             return redirect()->route('login')
                 ->with('mensaje', ProfileMessageHelper::EXITO_DELETE);
-
         } catch (\Exception $e) {
             return redirect()->route('usuario.perfil')
                 ->with('mensaje', ProfileMessageHelper::ERROR_DELETE);
