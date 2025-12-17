@@ -28,30 +28,22 @@ class AdminHotelController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validación mejorada
         $validated = $request->validate([
-            // Añadido 'unique' para que no haya dos usuarios iguales
-            'usuario' => 'required|string|max:100|unique:transfer_hotels,usuario',
-            'password' => 'required|string|min:4',
+            'nombre'   => 'required|string|max:255',
+            'usuario'  => 'required|string|max:100|unique:transfer_hotels,usuario',
+            'password' => 'required|string|min:6',
             'comision' => 'nullable|numeric|min:0',
-            'id_zona' => 'required|exists:transfer_zonas,id_zona',
+            'id_zona'  => 'required|exists:transfer_zonas,id_zona',
         ]);
 
-        // 2. Encriptar Contraseña
-        $validated['password'] = \Illuminate\Support\Facades\Hash::make($validated['password']);
-
-        // 3. Estado activo por defecto
-        $validated['status'] = 'activo';
-
-        // 4. Mapeo de Comisión (Con valor por defecto de 10€ según rúbrica)
-        // Si viene en el request lo usa, si no, pone 10.
-        $validated['Comision'] = $request->input('comision', 10);
-        
-        // Limpiamos la variable minúscula si existía para que no falle el insert
-        unset($validated['comision']); 
-
-        // 5. Guardar
-        TransferHotel::create($validated);
+        \App\Models\TransferHotel::create([
+            'nombre'   => $validated['nombre'],
+            'usuario'  => $validated['usuario'],
+            'id_zona'  => $validated['id_zona'],
+            'Comision' => $request->input('comision', 10),
+            'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+            'status'   => 'activo',
+        ]);
 
         return redirect()->route('admin.hoteles.index')
             ->with('success', 'Hotel creado correctamente.');
@@ -60,7 +52,6 @@ class AdminHotelController extends Controller
     /**
      * Modificar un hotel
      */
-
     public function update(Request $request, $id)
     {
 
