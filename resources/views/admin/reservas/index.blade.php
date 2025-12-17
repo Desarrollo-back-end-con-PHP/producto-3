@@ -16,6 +16,7 @@
         </div>
     </div>
 
+    {{-- Filtros --}}
     <div class="card mb-4 border-left-primary shadow h-100 py-2">
         <div class="card-body">
             <form action="{{ route('admin.reservas.index') }}" method="GET" class="row align-items-end">
@@ -39,13 +40,14 @@
         </div>
     </div>
 
+    {{-- Tabla --}}
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Listado Detallado</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-striped table-hover">
+                <table class="table table-striped table-hover align-middle">
                     <thead>
                         <tr>
                             <th>Localizador</th>
@@ -54,6 +56,7 @@
                             <th>Cliente</th>
                             <th>Estado</th>
                             <th class="text-end">Comisión</th>
+                            <th class="text-center">Acciones</th> {{-- Nueva columna --}}
                         </tr>
                     </thead>
                     <tbody>
@@ -86,10 +89,45 @@
                                 <span class="text-muted">-</span>
                                 @endif
                             </td>
+
+                            {{-- COLUMNA DE ACCIONES AÑADIDA --}}
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center align-items-center gap-2">
+                                    {{-- BOTÓN EDITAR: Siempre visible y del mismo tamaño --}}
+                                    <a href="{{ route('admin.reservas.edit', $reserva->id_reserva) }}" 
+                                       class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" 
+                                       style="width: 85px; height: 32px;">
+                                        <i class="fas fa-edit me-1"></i> Editar
+                                    </a>
+                            
+                                    {{-- BOTÓN ANULAR / ANULADA --}}
+                                    @if($reserva->status != 'cancelada')
+                                        <form action="{{ route('admin.reservas.destroy', $reserva->id_reserva) }}" 
+                                              method="POST" 
+                                              onsubmit="return confirm('¿Deseas anular esta reserva?');" 
+                                              class="m-0">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" 
+                                                    class="btn btn-sm btn-outline-danger d-flex align-items-center justify-content-center" 
+                                                    style="width: 85px; height: 32px;">
+                                                <i class="fas fa-ban me-1"></i> Anular
+                                            </button>
+                                        </form>
+                                    @else
+                                        {{-- BOTÓN ANULADA: Mismo ancho y alto que el de arriba para que no se mueva nada --}}
+                                        <button class="btn btn-sm btn-light text-muted border d-flex align-items-center justify-content-center" 
+                                                style="width: 85px; height: 32px;" 
+                                                disabled>
+                                            <i class="fas fa-check me-1"></i> Anulada
+                                        </button>
+                                    @endif
+                                </div>
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
+                            <td colspan="7" class="text-center text-muted py-4">
                                 No se encontraron reservas con los filtros actuales.
                             </td>
                         </tr>

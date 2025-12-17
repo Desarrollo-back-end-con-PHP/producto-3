@@ -41,6 +41,10 @@ class TransferViajero extends Authenticatable
     protected $casts = [
     'password' => 'hashed',
     'fecha_creacion' => 'datetime',
-];
+    ];
 
+    public function esAdmin()
+    {
+        return str_ends_with($this->email, '@islatransfers.com');
+    }
 }

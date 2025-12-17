@@ -21,15 +21,19 @@ class ViajeroController extends Controller
         $usuario = Auth::user();
         $mensaje = session('mensaje');
 
-        if ($usuario->email === 'admin@islatransfers.com') {
-            // Si es el ADMIN, mostramos TODAS las reservas de la base de datos
-            $reservas = TransferReserva::orderBy('fecha_reserva', 'desc')->get();
-        } else {
-            // Si es un USUARIO NORMAL, mostramos SOLO sus reservas
-            $reservas = TransferReserva::where('email_cliente', $usuario->email)
-                ->orderBy('fecha_reserva', 'desc')
-                ->get();
+        // 1. Caso ADMINISTRADOR (Cualquier correo que termine en @islatransfers.com)
+        if (str_ends_with($usuario->email, '@islatransfers.com')) {
+            return view('admin.perfil', [
+                'usuario' => $usuario,
+                'mensaje' => $mensaje
+            ]);
         }
+
+        // 2. Caso USUARIO NORMAL
+        $reservas = TransferReserva::where('email_cliente', $usuario->email)
+            ->orderBy('fecha_reserva', 'desc')
+            ->get();
+
         return view('users.perfil', [
             'usuario' => $usuario,
             'mensaje' => $mensaje,
