@@ -199,13 +199,19 @@
                                             @endforeach
                                         </tbody>
                                     </table>
+                                    <div class="text-center py-1">
+                                        <a href="{{ route('reservas.create') }}" class="btn btn-outline-primary mt-3">
+                                            Hacer otra reserva!
+                                        </a>
+                                    </div>
                                 </div>
                             @else
                                 <div class="alert alert-light border text-center py-4">
                                     <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
                                     <p class="mb-0 fs-5">Aún no tienes ninguna reserva registrada.</p>
                                     <a href="{{ route('reservas.create') }}" class="btn btn-outline-primary mt-3">¡Haz tu
-                                        primera reserva ahora!</a>
+                                        primera reserva ahora!
+                                    </a>
                                 </div>
                             @endif
 

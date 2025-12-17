@@ -52,19 +52,15 @@ public function create()
 
         $localizador = 'LOC-' . strtoupper(uniqid());
 
-        // Validación de perfil completo (mantener tu lógica)
         if ($user->email !== "admin@islatransfers.com" &&
-            (!$user->nombre || !$user->apellido1 || !$user->email)) { // ... resto de validaciones
+            (!$user->nombre || !$user->apellido1 || !$user->email)) {
             return redirect()->route('usuario.perfil')
                 ->with('mensaje', 'Completa tu perfil antes de reservar.');
         }
 
-        // Lógica para definir el email del cliente
         if ($user->email === "admin@islatransfers.com") {
-             // ... (Tu lógica de admin se mantiene igual)
              $emailCliente = $request->email_cliente;
         } else {
-            // Si es usuario normal, el cliente es él mismo
             $emailCliente = $user->email;
         }
 
@@ -74,18 +70,19 @@ public function create()
             'id_destino'           => $request->id_destino,
             'num_viajeros'         => $request->num_viajeros,
             'id_vehiculo'          => $request->id_vehiculo ?? null,
-            'fecha_entrada'        => $request->fecha_entrada ?? null, // Usar null si no hay dato
+            'fecha_reserva'        => now(),
+            'fecha_modificacion'   => now(),
+            'fecha_entrada'        => $request->fecha_entrada ?? null,
             'hora_entrada'         => $request->hora_entrada ?? null,
             'numero_vuelo_entrada' => $request->numero_vuelo_entrada ?? null,
-            // ... resto de campos opcionales
+            'origen_vuelo_entrada' => $request->origen_vuelo_entrada ?? null,
             'email_cliente'        => $emailCliente,
             'id_hotel'             => null, // IMPORTANTE: Usuario normal no lleva comisión de hotel
             'status'               => 'confirmada'
         ]);
 
-        // CAMBIO 2: Redirigir a "Mis Reservas" para ver lo que has creado
-        return redirect()->route('mis.reservas')
-            ->with('mensaje_exito', '¡Reserva creada correctamente!');
+        return redirect()->route('usuario.perfil')
+            ->with('mensaje', \App\Helpers\ProfileMessageHelper::EXITO_RESERVA);
     }
 
 

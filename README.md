@@ -49,3 +49,20 @@ Todos los endpoints detallados a continuación requieren autenticación mediante
 ## 🛠️ Notas Técnicas
 * **Autenticación:** Incluir el header `Authorization: Bearer <tu_token>`.
 * **Formato:** Todas las respuestas se entregan en formato `application/json`.
+
+
+# Comandos
+### Limpiar cachés (Si algo no se actualiza),
+./vendor/bin/sail artisan optimize:clear
+
+### Instalar dependencias PHP (Composer)
+./vendor/bin/sail composer install
+
+### Compilar Frontend (Vite/NPM),
+./vendor/bin/sail npm run dev
+
+### Crear un Controlador,
+./vendor/bin/sail artisan make:controller NombreController
+
+### Crear un Modelo + Migración
+./vendor/bin/sail artisan make:model Nombre -m
