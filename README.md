@@ -66,3 +66,6 @@ Todos los endpoints detallados a continuación requieren autenticación mediante
 
 ### Crear un Modelo + Migración
 ./vendor/bin/sail artisan make:model Nombre -m
+
+### Reiniciar la información de las BD.
+./vendor/bin/sail artisan migrate:fresh --seed

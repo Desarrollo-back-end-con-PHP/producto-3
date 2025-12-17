@@ -53,9 +53,11 @@ Route::middleware('auth')->group(function () {
     Route::controller(ReservaController::class)->group(function () {
         Route::get('/reservas/crear', 'create')->name('reservas.create');
         Route::post('/reservas', 'store')->name('reservas.store');
+        Route::get('/mis-reservas', 'misReservas')->name('mis.reservas');
         Route::get('/reservas/{id}/editar', 'edit')->name('reservas.edit');
         Route::put('/reservas/{id}', 'update')->name('reservas.update');
         Route::delete('/reservas/{id}', 'cancel')->name('reservas.cancel');
+        Route::put('/mis-reservas/cancelar/{id}', 'cancelarUsuario')->name('usuario.reservas.cancelar');
     });
 });
 
@@ -122,6 +124,9 @@ Route::prefix('hotel')->group(function () {
             Route::get('/panel', 'index')->name('hotel.panel');
             Route::get('/reservas/crear', 'createReserva')->name('hotel.reservas.create');
             Route::post('/reservas', 'store')->name('hotel.reservas.store');
+            Route::get('/reservas/{id}/editar', 'edit')->name('hotel.reservas.edit');
+            Route::put('/reservas/{id}', 'update')->name('hotel.reservas.update');
+            Route::post('/reservas/{id}/cancelar', 'cancel')->name('hotel.reservas.cancel');
         });
     });
 });

@@ -89,7 +89,7 @@
                 <div class="ms-auto">
                     <ul class="navbar-nav">
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center text-white fw-bold" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link d-flex align-items-center text-white fw-bold" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 
                                 {{-- LOGICA PHP PARA OBTENER EL NOMBRE --}}
                                 @php
@@ -100,10 +100,11 @@
                                 @endphp
 
                                 {{-- Texto: Hola, [Nombre Dinámico] --}}
-                                <span class="me-2">Hola, {{ $displayName }}</span>
-                                
-                                {{-- Avatar: Círculo blanco con letra dinámica --}}
-                                <div class="avatar-circle bg-white text-primary fw-bold">
+                                <span class="text-light d-none d-lg-inline">
+                                    {{ $displayName }}
+                                </span>
+                                <div class="rounded-circle bg-white text-primary fw-bold d-flex align-items-center justify-content-center shadow-sm ms-2"
+                                     style="width: 40px; height: 40px; font-size: 18px;">
                                     {{ $firstLetter }}
                                 </div>
                             </a>

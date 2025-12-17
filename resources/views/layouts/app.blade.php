@@ -60,15 +60,15 @@
                         ?>
 
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <div class="user-avatar me-2">
+                            <a class="nav-link d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="text-light d-none d-lg-inline">
+                                    {{ $displayName }}
+                                </span>
+                                <div class="rounded-circle bg-white text-primary fw-bold d-flex align-items-center justify-content-center shadow-sm ms-2"
+                                     style="width: 40px; height: 40px; font-size: 18px;">
                                     {{ $firstLetter }}
                                 </div>
-                                <span class="text-light d-none d-lg-inline">
-                                    Hola, {{ $displayName }}
-                                </span>
                             </a>
-
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
 
                                 @if($guardName === 'web' && $user->email === 'admin@islatransfers.com')

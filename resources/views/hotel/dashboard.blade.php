@@ -1,103 +1,178 @@
-@extends('layouts.app')
+{{-- Usamos el nuevo layout que creamos arriba --}}
+@extends('layouts.hotel') 
 
-@section('title', 'Panel Corporativo - ' . $hotel->usuario)
+@section('title', 'Dashboard - ' . $hotel->usuario)
 
 @section('content')
 <div class="container py-5">
 
-    <div class="row mb-4 align-items-center">
-        <div class="col-md-8">
-            <h1 class="fw-bold text-primary">
-                <i class="fas fa-hotel me-2"></i> {{ $hotel->usuario }}
-            </h1>
-            <p class="text-muted">Bienvenido a tu panel de gestión corporativa.</p>
+    {{-- 1. ENCABEZADO CON BOTÓN DE ACCIÓN RÁPIDA --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 text-dark fw-bold mb-0">Panel de Control</h1>
+            <p class="text-muted small">Resumen de actividad y comisiones.</p>
         </div>
-        <div class="col-md-4 text-md-end">
-            <a href="{{ route('hotel.reservas.create') }}" class="btn btn-success btn-lg shadow-sm">
-                <i class="fas fa-plus-circle me-2"></i> Nueva Reserva
+        <div>
+            <a href="{{ route('hotel.reservas.create') }}" class="btn btn-primary shadow-sm">
+                <i class="fas fa-plus me-2"></i>Crear Reserva
             </a>
         </div>
     </div>
 
-    <div class="row mb-5">
+    {{-- 2. DASHBOARDS INFORMATIVOS (Tarjetas / KPIs) --}}
+    <div class="row g-4 mb-5">
+        {{-- Tarjeta 1: Reservas Totales --}}
         <div class="col-md-4">
-            <div class="card text-white bg-primary shadow h-100">
+            <div class="card border-0 shadow-sm h-100 border-start border-primary border-4">
                 <div class="card-body">
-                    <h5 class="card-title"><i class="fas fa-ticket-alt me-2"></i> Reservas Totales</h5>
-                    <p class="display-4 fw-bold">{{ $reservas->count() }}</p>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-uppercase small fw-bold text-muted mb-1">Reservas Totales</div>
+                            <div class="h2 mb-0 fw-bold text-dark">{{ $reservas->total() }}</div>
+                        </div>
+                        <div class="text-primary opacity-50">
+                            <i class="fas fa-ticket-alt fa-3x"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        {{-- Tarjeta 2: Comisión Mensual --}}
         <div class="col-md-4">
-            <div class="card text-white bg-success shadow h-100">
+            <div class="card border-0 shadow-sm h-100 border-start border-success border-4">
                 <div class="card-body">
-                    <h5 class="card-title"><i class="fas fa-euro-sign me-2"></i> Comisión por Reserva</h5>
-                    <p class="display-4 fw-bold">{{ $hotel->Comision }} €</p>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-uppercase small fw-bold text-muted mb-1">Comisión (Este Mes)</div>
+                            <div class="h2 mb-0 fw-bold text-success">{{ number_format($comisionMensual, 2, ',', '.') }} €</div>
+                        </div>
+                        <div class="text-success opacity-50">
+                            <i class="fas fa-calendar-day fa-3x"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        {{-- Tarjeta 3: Total Histórico --}}
         <div class="col-md-4">
-            <div class="card text-white bg-dark shadow h-100">
+            <div class="card border-0 shadow-sm h-100 border-start border-dark border-4">
                 <div class="card-body">
-                    <h5 class="card-title"><i class="fas fa-chart-line me-2"></i> Total Generado</h5>
-                    <p class="display-4 fw-bold">{{ number_format($totalComisiones, 2) }} €</p>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-uppercase small fw-bold text-muted mb-1">Total Generado</div>
+                            <div class="h2 mb-0 fw-bold text-dark">{{ number_format($totalComisiones, 2, ',', '.') }} €</div>
+                        </div>
+                        <div class="text-dark opacity-50">
+                            <i class="fas fa-wallet fa-3x"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card shadow border-0">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold">Historial de Reservas</h5>
+    {{-- MENSAJES DE ÉXITO --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-        <div class="card-body">
+    @endif
+
+    {{-- 3. TABLA DE GESTIÓN --}}
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 border-bottom">
+            <h5 class="mb-0 fw-bold text-secondary">Últimas Reservas</h5>
+        </div>
+        <div class="card-body p-0">
             @if($reservas->isEmpty())
-            <p class="text-center text-muted my-4">Aún no has realizado ninguna reserva.</p>
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted opacity-25 mb-3"></i>
+                    <p class="text-muted">No hay reservas registradas.</p>
+                    <a href="{{ route('hotel.reservas.create') }}" class="btn btn-outline-primary btn-sm">Crear la primera</a>
+                </div>
             @else
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Localizador</th>
-                            <th>Fecha Reserva</th>
-                            <th>Cliente</th>
-                            <th>Tipo</th>
-                            <th>Vehículo</th>
-                            <th>Estado</th>
-                            <th class="text-end">Comisión</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($reservas as $reserva)
-                        <tr>
-                            <td class="fw-bold text-primary">{{ $reserva->localizador }}</td>
-                            <td>{{ \Carbon\Carbon::parse($reserva->fecha_reserva)->format('d/m/Y') }}</td>
-                            <td>{{ $reserva->email_cliente }}</td>
-                            <td>
-                                <span class="badge bg-info text-dark">
-                                    {{ $reserva->tipo->descripcion ?? 'N/A' }}
-                                </span>
-                            </td>
-                            <td>{{ $reserva->vehiculo->descripcion ?? 'Asignando...' }}</td>
-                            <td>
-                                @if($reserva->status == 'confirmada')
-                                <span class="badge bg-success">Confirmada</span>
-                                @elseif($reserva->status == 'pendiente')
-                                <span class="badge bg-warning text-dark">Pendiente</span>
-                                @else
-                                <span class="badge bg-secondary">{{ $reserva->status }}</span>
-                                @endif
-                            </td>
-                            <td class="text-end fw-bold text-success">
-                                + {{ $hotel->Comision }} €
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-uppercase small text-muted">
+                            <tr>
+                                <th class="ps-4">Ref.</th>
+                                <th>Fecha Servicio</th>
+                                <th>Detalles</th>
+                                <th>Cliente</th>
+                                <th>Estado</th>
+                                <th class="text-center">Comisión</th>
+                                <th class="text-end pe-4">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($reservas as $reserva)
+                            <tr>
+                                <td class="ps-4 fw-bold text-primary font-monospace">{{ $reserva->localizador }}</td>
+                                
+                                <td>
+                                    <div class="fw-bold">{{ \Carbon\Carbon::parse($reserva->fecha_entrada)->format('d/m/Y') }}</div>
+                                    <small class="text-muted">{{ \Carbon\Carbon::parse($reserva->hora_entrada)->format('H:i') }}</small>
+                                </td>
+
+                                <td>
+                                    @if($reserva->destino)
+                                        <div class="small fw-bold text-dark"><i class="fas fa-map-pin me-1 text-danger"></i> {{ $reserva->destino->usuario }}</div>
+                                    @endif
+                                    <span class="badge bg-light text-dark border mt-1">{{ $reserva->vehiculo->modelo ?? 'Auto' }}</span>
+                                </td>
+
+                                <td>
+                                    <div class="text-truncate" style="max-width: 150px;">{{ $reserva->email_cliente }}</div>
+                                    <small class="text-muted">{{ $reserva->num_viajeros }} pax</small>
+                                </td>
+
+                                <td>
+                                    @if($reserva->status == 'confirmada')
+                                        <span class="badge bg-success bg-opacity-10 text-success px-2 py-1">Confirmada</span>
+                                    @elseif($reserva->status == 'cancelada')
+                                        <span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1">Cancelada</span>
+                                    @else
+                                        <span class="badge bg-warning text-dark px-2 py-1">{{ ucfirst($reserva->status) }}</span>
+                                    @endif
+                                </td>
+
+                                <td class="text-center text-success fw-bold">
+                                    @if($reserva->status != 'cancelada')
+                                        +{{ number_format($hotel->Comision, 2) }}€
+                                    @else
+                                        <span class="text-muted text-decoration-line-through small">{{ number_format($hotel->Comision, 2) }}€</span>
+                                    @endif
+                                </td>
+
+                                <td class="text-end pe-4">
+                                    @if($reserva->status != 'cancelada')
+                                        <div class="btn-group">
+                                            <a href="{{ route('hotel.reservas.edit', $reserva->id_reserva) }}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form action="{{ route('hotel.reservas.cancel', $reserva->id_reserva) }}" method="POST" onsubmit="return confirm('¿Cancelar reserva?');">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-danger ms-1" title="Cancelar">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-3">
+                    {{ $reservas->links() }}
+                </div>
             @endif
         </div>
     </div>
+
 </div>
 @endsection

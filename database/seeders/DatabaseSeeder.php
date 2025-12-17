@@ -18,7 +18,6 @@ class DatabaseSeeder extends Seeder
             TransferTipoReservaSeeder::class, // 2. Independiente
             TransferVehiculoSeeder::class,    // 3. Independiente
             TransferViajeroSeeder::class,     // 4. Independiente
-
             TransferHotelSeeder::class,       // 5. Depende de Zonas
             TransferPrecioSeeder::class,      // 6. Depende de Vehículos y Hoteles
             TransferReservaSeeder::class,     // 7. Depende de TODO

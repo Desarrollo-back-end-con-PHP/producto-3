@@ -168,6 +168,7 @@
                                                 <th>Fecha Entrada</th>
                                                 <th>Origen</th>
                                                 <th>Estado</th>
+                                                <th class="text-center">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -193,6 +194,22 @@
                                                         @else
                                                             <span
                                                                 class="badge bg-warning text-dark">{{ $reserva->status }}</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-center">
+                                                        @if($reserva->status != 'cancelada' && $reserva->status != 'completada')
+                                                            {{-- Formulario para cancelar --}}
+                                                            <form action="{{ route('usuario.reservas.cancelar', $reserva->id_reserva) }}" method="POST" 
+                                                                  onsubmit="return confirm('¿Estás seguro de que deseas anular esta reserva? Esta acción no se puede deshacer.');">
+                                                                @csrf
+                                                                @method('PUT') {{-- Usamos PUT para actualizar el estado --}}
+                                                                
+                                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Anular Reserva">
+                                                                    <i class="fas fa-times me-1"></i> Anular
+                                                                </button>
+                                                            </form>
+                                                        @else
+                                                            <span class="text-muted small">-</span>
                                                         @endif
                                                     </td>
                                                 </tr>
