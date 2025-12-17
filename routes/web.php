@@ -9,8 +9,8 @@ use App\Http\Controllers\AdminReservaController;
 use App\Http\Controllers\AdminCalendarController;
 use App\Http\Controllers\HotelAuthController;
 use App\Http\Controllers\HotelPanelController;
-// 1. AÑADIDO: Importamos el controlador para Perfil y Contraseña
-use App\Http\Controllers\Api\ApiViajeroController;
+use App\Http\Controllers\ReservaController;
+use App\Http\Controllers\ViajeroController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -36,10 +36,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     // 2. MODIFICADO: Apuntamos al controlador para ver DATOS + RESERVAS
-    Route::get('/usuario/perfil', [ApiViajeroController::class, 'mostrarPerfil'])->name('usuario.perfil');
-
+    Route::get('/usuario/perfil', [ViajeroController::class, 'mostrarPerfil'])->name('usuario.perfil');
     // 3. AÑADIDO: Ruta para guardar la nueva contraseña
-    Route::post('/usuario/password', [ApiViajeroController::class, 'actualizarContrasenaWeb'])->name('usuario.password.update');
+    Route::post('/usuario/password', [ViajeroController::class, 'actualizarContrasena'])->name('usuario.password.update');
+    // Formulario para crear nueva reserva
+    Route::get('/reservas/crear', [ReservaController::class, 'create'])->name('reservas.create');
+
+    // Guardar la reserva (POST)
+    Route::post('/reservas', [ReservaController::class, 'store'])->name('reservas.store');
+
+    Route::get('/reservas/{id}/editar', [ReservaController::class, 'edit'])->name('reservas.edit');
+    Route::put('/reservas/{id}', [ReservaController::class, 'update'])->name('reservas.update');
+    Route::delete('/reservas/{id}', [ReservaController::class, 'cancel'])->name('reservas.cancel');
 });
 
 // ---------------------- RUTAS PROTEGIDAS ADMIN -------------------------------------
@@ -66,7 +74,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
 
     //------------------------ RESERVAS   ------------------------------------------
-    //MOSTRAR RESERVAS Y COMISIONES 
+    //MOSTRAR RESERVAS Y COMISIONES
     Route::get('/reservas', [\App\Http\Controllers\AdminReservaController::class, 'index'])->name('admin.reservas.index');
     // RUTAS CRUD QUE FALTABAN PARA CREAR Y EDITAR:
     Route::get('/reservas/crear', [\App\Http\Controllers\AdminReservaController::class, 'create'])->name('admin.reservas.create');

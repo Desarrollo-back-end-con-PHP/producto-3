@@ -15,6 +15,7 @@ class TransferReserva extends Model
 
     protected $fillable = [
         'localizador',
+        'id_hotel',
         'id_tipo_reserva',
         'email_cliente',
         'fecha_reserva',
@@ -86,16 +87,16 @@ class TransferReserva extends Model
 ) {
     try {
         if (empty($email_cliente)) {
-            return false; 
+            return false;
         }
 
         $localizador = uniqid("LOC-");
         $fecha_actual = now();
 
-    
-        if ($id_tipo_reserva == 1) { 
+
+        if ($id_tipo_reserva == 1) {
             $fecha_vuelo_salida = $hora_vuelo_salida = $numero_vuelo_salida = $hora_recogida = null;
-        } elseif ($id_tipo_reserva == 2) { 
+        } elseif ($id_tipo_reserva == 2) {
             $fecha_entrada = $hora_entrada = $numero_vuelo_entrada = $origen_vuelo_entrada = null;
         }
 
@@ -193,7 +194,7 @@ class TransferReserva extends Model
         return $this->belongsTo(TransferTipoReserva::class, 'id_tipo_reserva', 'id_tipo_reserva');
     }
 
-    
+
     public function destino()
     {
         return $this->belongsTo(TransferHotel::class, 'id_destino', 'id_hotel');

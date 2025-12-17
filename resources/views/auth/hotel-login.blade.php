@@ -1,4 +1,5 @@
-@extends('layouts.app') @section('title', 'Acceso Corporativo - Hoteles') @section('content')
+@extends('layouts.app')
+@section('title', 'Acceso Corporativo - Hoteles') @section('content')
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-5">
