@@ -8,9 +8,9 @@ use App\Http\Controllers\Api\ApiZonaController;
 use App\Http\Controllers\Api\ApiReservaController;
 
 
-Route::post('/registro', [ApiAuthController::class, 'register']);
-Route::post('/login', [ApiAuthController::class, 'login']);
-Route::post('/logout', [ApiAuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::post('/registro', [ApiAuthController::class, 'registerApi']);
+Route::post('/login', [ApiAuthController::class, 'loginApi']);
+Route::post('/logout', [ApiAuthController::class, 'logoutApi'])->middleware('auth:sanctum'); 
 
 
 Route::get('/zonas-stats', [ApiZonaController::class, 'index']);
@@ -18,18 +18,18 @@ Route::get('/zonas-stats', [ApiZonaController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function() {
     // Usuario
-    Route::get('/usuario/perfil', [ApiViajeroController::class, 'mostrarPerfil']);
-    Route::post('/usuario/actualizar-datos', [ApiViajeroController::class, 'actualizarDatos']);
-    Route::post('/usuario/actualizar-contrasena', [ApiViajeroController::class, 'actualizarContrasena']);
-    Route::delete('/usuario/eliminar', [ApiViajeroController::class, 'eliminarUsuario']);
+    Route::get('/usuario/perfil', [ApiViajeroController::class, 'mostrarPerfilApi']); 
+    Route::post('/usuario/actualizar-datos', [ApiViajeroController::class, 'actualizarDatosApi']);
+    Route::post('/usuario/actualizar-contrasena', [ApiViajeroController::class, 'actualizarContrasenaApi']);
+    Route::delete('/usuario/eliminar', [ApiViajeroController::class, 'eliminarUsuarioApi']); 
 
     // Reservas
-    Route::get('/reservas/form-data', [ApiReservaController::class, 'createData']);
-    Route::post('/reservas/crear', [ApiReservaController::class, 'store']);
-    Route::get('/reservas', [ApiReservaController::class, 'misReservas']);
-    Route::get('/reservas/{id}', [ApiReservaController::class, 'edit']);
-    Route::put('/reservas/{id}', [ApiReservaController::class, 'update']);
-    Route::delete('/reservas/{id}', [ApiReservaController::class, 'cancel']);
+    Route::get('/reservas/form-data', [ApiReservaController::class, 'createDataApi']);
+    Route::post('/reservas/crear', [ApiReservaController::class, 'storeApi']);
+    Route::get('/reservas/misReservas', [ApiReservaController::class, 'misReservasApi']);
+    Route::get('/reservas/{id}', [ApiReservaController::class, 'editApi']);
+    Route::put('/reservas/{id}', [ApiReservaController::class, 'updateApi']);
+    Route::delete('/reservas/{id}', [ApiReservaController::class, 'cancelApi']);
     
 
 });
