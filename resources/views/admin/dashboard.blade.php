@@ -5,7 +5,7 @@
 @section('content')
 <div class="container py-5">
 
-    {{-- 1. ENCABEZADO (Mismo estilo que Hotel: Título negrita + Botones con sombra) --}}
+    {{-- 1. ENCABEZADO --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="h3 text-dark fw-bold mb-0">Dashboard</h1>
@@ -21,12 +21,12 @@
         </div>
     </div>
 
-    {{-- 2. TARJETAS / KPIS (Estilo idéntico: Borde izquierdo grueso, icono grande a la derecha) --}}
+    {{-- 2. TARJETAS / KPIS --}}
     <div class="row g-4 mb-5">
         
-        {{-- Tarjeta 1: Total Reservas --}}
+        {{-- Tarjeta 1: Total Reservas (ACTUALIZADA CON LINK) --}}
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100 border-start border-primary border-4">
+            <div class="card border-0 shadow-sm h-100 border-start border-primary border-4 position-relative">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
@@ -37,13 +37,15 @@
                             <i class="fas fa-calendar-check fa-3x"></i>
                         </div>
                     </div>
+                    {{-- Link para entrar a la sección de reservas --}}
+                    <a href="{{ route('admin.reservas.index') }}" class="stretched-link"></a>
                 </div>
             </div>
         </div>
 
         {{-- Tarjeta 2: Hoteles Activos --}}
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100 border-start border-success border-4">
+            <div class="card border-0 shadow-sm h-100 border-start border-success border-4 position-relative">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
@@ -54,7 +56,6 @@
                             <i class="fas fa-hotel fa-3x"></i>
                         </div>
                     </div>
-                    {{-- Link extendido para hacer clic en toda la tarjeta --}}
                     <a href="{{ route('admin.hoteles.index') }}" class="stretched-link"></a>
                 </div>
             </div>
@@ -62,7 +63,7 @@
 
         {{-- Tarjeta 3: Viajeros Registrados --}}
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100 border-start border-info border-4">
+            <div class="card border-0 shadow-sm h-100 border-start border-info border-4 position-relative">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
@@ -79,7 +80,7 @@
         </div>
     </div>
 
-    {{-- 3. TABLA DE ÚLTIMAS RESERVAS (Estilo idéntico: Header blanco, hover, badges con opacidad) --}}
+    {{-- 3. TABLA DE ÚLTIMAS RESERVAS --}}
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
             <h5 class="mb-0 fw-bold text-secondary">Últimas Reservas (Global)</h5>
@@ -105,14 +106,8 @@
                             @foreach($reservas as $reserva)
                             <tr>
                                 <td class="ps-4 fw-bold text-primary font-monospace">{{ $reserva->localizador }}</td>
-
-                                {{-- FECHA --}}
                                 <td>{{ \Carbon\Carbon::parse($reserva->fecha_entrada)->format('d/m/Y') }}</td>
-
-                                {{-- HORA --}}
                                 <td><small class="text-muted">{{ \Carbon\Carbon::parse($reserva->hora_entrada)->format('H:i') }}</small></td>
-
-                                {{-- ORIGEN --}}
                                 <td>
                                     @if($reserva->id_tipo_reserva == 2 && $reserva->hotel)
                                         <div class="small fw-bold text-dark"><i class="fas fa-hotel text-secondary me-1"></i> {{ $reserva->hotel->usuario }}</div>
@@ -120,8 +115,6 @@
                                         <div class="small"><i class="fas fa-plane-arrival text-secondary me-1"></i> Aeropuerto</div>
                                     @endif
                                 </td>
-
-                                {{-- DESTINO --}}
                                 <td>
                                     @if(($reserva->id_tipo_reserva == 1 || $reserva->id_tipo_reserva == 3) && $reserva->destino)
                                         <div class="small fw-bold text-dark"><i class="fas fa-hotel text-secondary me-1"></i> {{ $reserva->destino->usuario }}</div>
@@ -129,13 +122,9 @@
                                         <div class="small"><i class="fas fa-plane-departure text-secondary me-1"></i> Aeropuerto</div>
                                     @endif
                                 </td>
-
-                                {{-- CLIENTE --}}
                                 <td>
                                     <div class="small text-truncate" style="max-width: 150px;">{{ $reserva->email_cliente }}</div>
                                 </td>
-
-                                {{-- ESTADO (Badges estilo moderno con opacidad) --}}
                                 <td>
                                     @if($reserva->status == 'confirmada')
                                         <span class="badge bg-success bg-opacity-10 text-success px-2 py-1">Confirmada</span>
@@ -160,6 +149,5 @@
             </div>
         </div>
     </div>
-
 </div>
 @endsection
