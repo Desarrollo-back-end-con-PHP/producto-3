@@ -10,7 +10,7 @@
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0"><i class="fas fa-user mb-1 me-2"></i>Mi Perfil de Usuario</h4>
                 </div>
-                
+
                 <div class="card-body p-4">
                     @auth
                         {{-- Avatar --}}
@@ -33,7 +33,7 @@
                                 <input type="email" class="form-control" value="{{ Auth::user()->email }}" readonly>
                             </div>
                         </div>
-                        
+
                         <hr class="my-4">
 
                         {{-- Cambio de Contraseña --}}
@@ -90,11 +90,11 @@
                                             <tr>
                                                 <td class="fw-bold text-primary">{{ $reserva->localizador }}</td>
                                                 <td>
-                                                    {{ \Carbon\Carbon::parse($reserva->fecha_entrada)->format('d/m/Y') }} 
+                                                    {{ \Carbon\Carbon::parse($reserva->fecha_entrada)->format('d/m/Y') }}
                                                     <br> <small class="text-muted">{{ $reserva->hora_entrada }}</small>
                                                 </td>
                                                 <td>
-                                                    {{ $reserva->origen_vuelo_entrada ?? 'N/A' }} 
+                                                    {{ $reserva->origen_vuelo_entrada ?? 'N/A' }}
                                                     @if($reserva->numero_vuelo_entrada)
                                                         <br><small class="text-muted"><i class="fas fa-plane"></i> {{ $reserva->numero_vuelo_entrada }}</small>
                                                     @endif
@@ -117,7 +117,7 @@
                             <div class="alert alert-light border text-center py-4">
                                 <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
                                 <p class="mb-0 fs-5">Aún no tienes ninguna reserva registrada.</p>
-                                <a href="{{ url('/') }}" class="btn btn-outline-primary mt-3">¡Haz tu primera reserva ahora!</a>
+                                <a href="{{ url('/reservas/crear') }}" class="btn btn-outline-primary mt-3">¡Haz tu primera reserva ahora!</a>
                             </div>
                         @endif
 
@@ -128,7 +128,7 @@
                             <a href="{{ url('/') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left me-2"></i> Volver al Inicio
                             </a>
-                            
+
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
                                 <button type="submit" class="btn btn-danger">

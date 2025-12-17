@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminReservaController;
 use App\Http\Controllers\AdminCalendarController;
 use App\Http\Controllers\HotelAuthController;
 use App\Http\Controllers\HotelPanelController;
+use App\Http\Controllers\ReservaController;
 // 1. AÑADIDO: Importamos el controlador para Perfil y Contraseña
 use App\Http\Controllers\Api\ApiViajeroController;
 
@@ -40,6 +41,16 @@ Route::middleware('auth')->group(function () {
 
     // 3. AÑADIDO: Ruta para guardar la nueva contraseña
     Route::post('/usuario/password', [ApiViajeroController::class, 'actualizarContrasenaWeb'])->name('usuario.password.update');
+
+    // Formulario para crear nueva reserva
+    Route::get('/reservas/crear', [ReservaController::class, 'create'])->name('reservas.create');
+
+    // Guardar la reserva (POST)
+    Route::post('/reservas', [ReservaController::class, 'store'])->name('reservas.store');
+
+    Route::get('/reservas/{id}/editar', [ReservaController::class, 'edit'])->name('reservas.edit');
+    Route::put('/reservas/{id}', [ReservaController::class, 'update'])->name('reservas.update');
+    Route::delete('/reservas/{id}', [ReservaController::class, 'cancel'])->name('reservas.cancel');
 });
 
 // ---------------------- RUTAS PROTEGIDAS ADMIN -------------------------------------
@@ -66,7 +77,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
 
     //------------------------ RESERVAS   ------------------------------------------
-    //MOSTRAR RESERVAS Y COMISIONES 
+    //MOSTRAR RESERVAS Y COMISIONES
     Route::get('/reservas', [\App\Http\Controllers\AdminReservaController::class, 'index'])->name('admin.reservas.index');
     // RUTAS CRUD QUE FALTABAN PARA CREAR Y EDITAR:
     Route::get('/reservas/crear', [\App\Http\Controllers\AdminReservaController::class, 'create'])->name('admin.reservas.create');
