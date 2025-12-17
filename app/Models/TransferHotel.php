@@ -18,8 +18,9 @@ class TransferHotel extends Authenticatable
     // Los campos que permitimos escribir
     protected $fillable = [
         'id_zona',
-        'Comision',
+        'nombre',
         'usuario',
+        'Comision',
         'password',
         'status'
     ];

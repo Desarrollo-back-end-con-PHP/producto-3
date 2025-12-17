@@ -45,7 +45,7 @@
                                 <select name="id_destino" class="form-select" required>
                                     <option value="">-- Selecciona --</option>
                                     @foreach($hotelesDestino as $h)
-                                        <option value="{{ $h->id_hotel }}">{{ $h->usuario }}</option>
+                                        <option value="{{ $h->id_hotel }}">{{ $h->nombre }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -79,9 +79,13 @@
                                 <label class="form-label">Hora</label>
                                 <input type="time" name="hora_entrada" class="form-control" required>
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <label class="form-label">Número de Vuelo (Opcional)</label>
                                 <input type="text" name="numero_vuelo_entrada" class="form-control" placeholder="Ej: IB-1234">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Origen del Vuelo (Opcional)</label>
+                                <input type="text" name="origen_vuelo_entrada" class="form-control" placeholder="Ej: Madrid">
                             </div>
                         </div>
 

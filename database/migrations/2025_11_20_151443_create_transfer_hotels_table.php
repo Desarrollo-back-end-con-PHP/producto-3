@@ -17,9 +17,9 @@ return new class extends Migration
             //asignar id_zona como FK
             $table->unsignedBigInteger('id_zona')->nullable();
             $table->foreign('id_zona')->references('id_zona')->on('transfer_zonas');
-
+            $table->string('nombre');
+            $table->string('usuario')->unique();
             $table->integer('Comision')->nullable();
-            $table->string('usuario', 100)->nullable();
             $table->string('password', 100);
 
             $table->enum('status', ['activo', 'inactivo'])->default('activo');

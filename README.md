@@ -1,108 +1,68 @@
-## Arrancar el proyecto por primera vez:
+# 🌴 Isla Transfers API & App
 
-docker run --rm \
- -u "$(id -u):$(id -g)" \
- -v "$(pwd):/var/www/html" \
- -w /var/www/html \
- laravelsail/php84-composer:latest \
- composer install --ignore-platform-reqs
+Sistema de gestión de reservas para traslados. Este documento detalla las credenciales de acceso, los endpoints de la API y las rutas de navegación.
 
-### Copia el archivo de entorno (si no lo tienes):
+## 🔐 Credenciales de Prueba
 
-cp .env.example .env
+Para facilitar el testing, se han habilitado los siguientes perfiles:
 
-consultar en terminal id -u y id-g para ver que valor asignar a WWWUSER = ? y WWWGROUP = ?
+### 👤 Perfil de Usuario (Cliente)
+* **Email:** `user@gmail.com`
+* **Contraseña:** `P@ssw0rd`
 
-modificar si es necesario las credenciales de la base de datos.
+### 🏨 Perfil Corporativo (Hotel)
+* **Usuario:** `hotel_iberostar`
+* **Contraseña:** `password123`
+* **Detalles:** Hotel Iberostar Alcudia (Comisión: 10% | Zona Norte)
 
-### Levanta el proyecto
+### 🛡️ Perfil de Administrador
+* **Email:** `admin@islatransfers.com`
+* **Contraseña:** `P@ssw0rd`
 
-Laravel recomienda usar su comando sail en lugar de docker-compose directo, pero es lo mismo
+---
 
-./vendor/bin/sail up -d
+## 🛣️ Rutas de Navegación (Frontend)
 
-### Generar la calve de enciptación:
+| Ruta | Acceso | Descripción |
+| :--- | :--- | :--- |
+| `/login` | Público | Formulario de acceso al sistema. |
+| `/perfil` | Privado | Información personal del usuario o empresa. |
+| `/reservas` | Privado | Listado de reservas realizadas. |
+| `/reservas/nueva` | Privado | Formulario para crear una nueva reserva. |
+| `/admin/dashboard` | Solo Admin | Panel de control y estadísticas. |
 
-./vendor/bin/sail artisan key:generate
+---
 
-### Migrar la base de datos:
+## 🚀 API Endpoints
 
-./vendor/bin/sail artisan migrate
+Todos los endpoints detallados a continuación requieren autenticación mediante Token (`Bearer`).
 
-### Rellenar la base de datos con los seeders:
+| Método | Endpoint | Descripción | Auth |
+| :--- | :--- | :--- | :---: |
+| `GET` | `/api/usuario/perfil` | Consultar los datos del usuario logueado. | ✅ |
+| `GET` | `/api/reservas` | Obtener el historial completo de reservas del usuario. | ✅ |
+| `GET` | `/api/reservas/{id}` | Ver los detalles de una reserva específica (por ID). | ✅ |
+| `GET` | `/api/reservas/form-data` | Obtener listados auxiliares (hoteles, vehículos) para formularios. | ✅ |
 
-./vendor/bin/sail artisan db:seed
+---
 
-### Visualizar en navegador:
+## 🛠️ Notas Técnicas
+* **Autenticación:** Incluir el header `Authorization: Bearer <tu_token>`.
+* **Formato:** Todas las respuestas se entregan en formato `application/json`.
 
-acceder a: http://localhost:80
 
-## Comandos útiles:
+# Comandos
+### Limpiar cachés (Si algo no se actualiza),
+./vendor/bin/sail artisan optimize:clear
 
-Es el equivalente a docker-compose down
-./vendor/bin/sail down
+### Instalar dependencias PHP (Composer)
+./vendor/bin/sail composer install
 
-Es el equivalente a docker-compose up -d
-./vendor/bin/sail artisan key:generate
+### Compilar Frontend (Vite/NPM),
+./vendor/bin/sail npm run dev
 
-# CONTENIDO GENERADO AUTOMÁTICAMENTE POR LARAVEL
+### Crear un Controlador,
+./vendor/bin/sail artisan make:controller NombreController
 
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
-
-## About Laravel
-
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
--   [Simple, fast routing engine](https://laravel.com/docs/routing).
--   [Powerful dependency injection container](https://laravel.com/docs/container).
--   Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
--   Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
--   Database agnostic [schema migrations](https://laravel.com/docs/migrations).
--   [Robust background job processing](https://laravel.com/docs/queues).
--   [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
--   **[Vehikl](https://vehikl.com)**
--   **[Tighten Co.](https://tighten.co)**
--   **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
--   **[64 Robots](https://64robots.com)**
--   **[Curotec](https://www.curotec.com/services/technologies/laravel)**
--   **[DevSquad](https://devsquad.com/hire-laravel-developers)**
--   **[Redberry](https://redberry.international/laravel-development)**
--   **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Crear un Modelo + Migración
+./vendor/bin/sail artisan make:model Nombre -m
