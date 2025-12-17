@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\TransferReserva;
 use App\Models\TransferHotel;
-use App\Models\TransferVehiculo;     // Asegúrate de importar esto
-use App\Models\TransferTipoReserva;  // Asegúrate de importar esto
+use App\Models\TransferVehiculo;
+use App\Models\TransferTipoReserva;
 use Illuminate\Support\Facades\DB;
 
 class AdminReservaController extends Controller
@@ -59,8 +59,7 @@ class AdminReservaController extends Controller
     }
 
     /**
-     * ESTO ES LO QUE FALTABA PARA EL CALENDARIO
-     * Formulario de creación
+     * Formulario de creación (Admin)
      */
     public function create(Request $request)
     {
@@ -82,39 +81,38 @@ class AdminReservaController extends Controller
         $validated = $request->validate([
             'email_cliente' => 'required|email|max:100',
             'id_tipo_reserva' => 'required',
-            'id_destino' => 'required', // A dónde va
+            'id_destino' => 'required',
             'id_vehiculo' => 'required',
             'fecha_entrada' => 'required|date',
             'hora_entrada' => 'required',
             'num_viajeros' => 'required|integer|min:1',
-            // El admin puede asignar manualmente a qué hotel le cuenta la reserva (comisión)
-            // Opcional: podrías hacerlo automático según el destino
-             'id_hotel_comision' => 'required|exists:transfer_hotels,id_hotel' 
+            'id_hotel_comision' => 'required|exists:transfer_hotels,id_hotel'
         ]);
 
         $localizador = 'ADM-' . strtoupper(substr(md5(uniqid()), 0, 6));
 
         TransferReserva::create([
-            'localizador' => $localizador,
-            'id_hotel' => $request->id_hotel_comision, // Importante para el reporte
-            'email_cliente' => $request->email_cliente,
-            'id_tipo_reserva' => $request->id_tipo_reserva,
-            'id_destino' => $request->id_destino,
-            'id_vehiculo' => $request->id_vehiculo,
-            'fecha_reserva' => now(),
-            'fecha_entrada' => $request->fecha_entrada,
-            'hora_entrada' => $request->hora_entrada,
-            'num_viajeros' => $request->num_viajeros,
+            'localizador'          => $localizador,
+            'id_hotel'             => $request->id_hotel_comision, // Importante para el reporte
+            'email_cliente'        => $request->email_cliente,
+            'id_tipo_reserva'      => $request->id_tipo_reserva,
+            'id_destino'           => $request->id_destino,
+            'id_vehiculo'          => $request->id_vehiculo,
+            'fecha_reserva'        => now(),
+            'fecha_modificacion'   => now(),
+            'fecha_entrada'        => $request->fecha_entrada,
+            'hora_entrada'         => $request->hora_entrada,
+            'num_viajeros'         => $request->num_viajeros,
             'numero_vuelo_entrada' => $request->numero_vuelo_entrada,
             'origen_vuelo_entrada' => $request->origen_vuelo_entrada,
-            'status' => 'confirmada'
+            'status'               => 'confirmada'
         ]);
 
         // Si veníamos del calendario, volvemos al calendario
         return redirect()->route('admin.calendar')
             ->with('success', 'Reserva creada manualmente.');
     }
-    
+
     // Función dummy para editar (para que no falle el calendario al hacer clic en una reserva existente)
     public function edit($id) {
         $reserva = TransferReserva::findOrFail($id);
@@ -123,7 +121,7 @@ class AdminReservaController extends Controller
         $tipos = TransferTipoReserva::all();
         return view('admin.reservas.edit', compact('reserva', 'hoteles', 'vehiculos', 'tipos'));
     }
-    
+
     // Función update
      public function update(Request $request, $id) {
         // Lógica update...
