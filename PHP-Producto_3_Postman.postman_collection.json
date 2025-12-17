@@ -1,0 +1,15 @@
+{
+	"info": {
+		"_postman_id": "7c1fbd72-25c4-4077-bbd4-0f071b9aa734",
+		"name": "PHP-Producto_3_Postman",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "49942604",
+		"_collection_link": "https://laboral-1393.postman.co/workspace/UOC~90b041e0-bac0-4cc6-9a8c-aa962f21643f/collection/49942604-7c1fbd72-25c4-4077-bbd4-0f071b9aa734?action=share&source=collection_link&creator=49942604"
+	},
+	"item": [
+		{
+			"name": "Producto-3",
+			"item": []
+		}
+	]
+}
