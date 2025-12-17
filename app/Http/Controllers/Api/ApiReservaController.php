@@ -10,6 +10,7 @@ use App\Models\TransferTipoReserva;
 use App\Models\TransferHotel;
 use App\Models\TransferViajero;
 use App\Helpers\ProfileMessageHelper;
+use App\Models\TransferReservaAdmin;
 
 class ApiReservaController extends Controller
 {
@@ -18,14 +19,15 @@ class ApiReservaController extends Controller
         $this->middleware("auth:sanctum");
     }
 
-    public function createData()
+    public function createDataApi()
     {
         return response()->json([
             'trayectos' => TransferTipoReserva::all(),
             'hoteles'   => TransferHotel::all(),
         ]);
     }
-    public function store(Request $request)
+
+    public function storeApi(Request $request)
 {
     $request->validate([
         'id_tipo_reserva' => 'required|integer',
@@ -35,45 +37,43 @@ class ApiReservaController extends Controller
 
     $user = Auth::user();
 
-    if ($user->email !== "admin@islatransfers.com" &&
-            (!$user->nombre || !$user->apellido1 || !$user->email ||
-             !$user->direccion || !$user->codigoPostal || !$user->ciudad || !$user->pais)) {
 
+    if ($user->email !== "admin@islatransfers.com" &&
+        (!$user->nombre || !$user->apellido1 || !$user->email ||
+         !$user->direccion || !$user->codigoPostal || !$user->ciudad || !$user->pais)) {
+        return response()->json([
+            'success' => false,
+            'mensaje' => 'PROFILE_REQUIRED'
+        ], 403);
+    }
+
+    if ($user->email === "admin@islatransfers.com") {
+        if (!$request->email_cliente || !$request->codigo_admin) {
             return response()->json([
                 'success' => false,
-                'mensaje' => 'PROFILE_REQUIRED'
-            ], 403);
+                'mensaje' => 'Debes indicar email y código admin.'
+            ], 400);
         }
 
-        // Cambiado: lógica admin para crear reserva de otro usuario
-        if ($user->email === "admin@islatransfers.com") {
-
-            if (!$request->email_cliente || !$request->codigo_admin) {
-                return response()->json([
-                    'success' => false,
-                    'mensaje' => 'Debes indicar email y código admin.'
-                ], 400);
-            }
-
-            $cliente = TransferViajero::where('email', $request->email_cliente)->first();
-
-            if (!$cliente ||
-                !$cliente->nombre || !$cliente->apellido1 || !$cliente->email ||
-                !$cliente->direccion || !$cliente->codigoPostal || !$cliente->ciudad || !$cliente->pais) {
-
-                return response()->json([
-                    'success' => false,
-                    'mensaje' => 'El perfil del cliente está incompleto.'
-                ], 400);
-            }
-
-            $emailCliente = $request->email_cliente;
-
-        } else {
-            $emailCliente = $user->email;
+        $cliente = TransferViajero::where('email', $request->email_cliente)->first();
+        if (!$cliente ||
+            !$cliente->nombre || !$cliente->apellido1 || !$cliente->email ||
+            !$cliente->direccion || !$cliente->codigoPostal || !$cliente->ciudad || !$cliente->pais) {
+            return response()->json([
+                'success' => false,
+                'mensaje' => 'El perfil del cliente está incompleto.'
+            ], 400);
         }
 
+        $emailCliente = $request->email_cliente;
+        $codigo_admin = $request->codigo_admin;
 
+    } else {
+        $emailCliente = $user->email;
+        $codigo_admin = null;
+    }
+
+    // Crear reserva normal
     $localizador = TransferReserva::crearReserva(
         $request->id_tipo_reserva,
         $request->id_destino,
@@ -97,13 +97,25 @@ class ApiReservaController extends Controller
         ], 500);
     }
 
+    if ($user->email === "admin@islatransfers.com") {
+        $reserva = TransferReserva::where('localizador', $localizador)->first();
+
+        TransferReservaAdmin::create([
+            'id_reserva' => $reserva->id_reserva,
+            'id_admin'   => $codigo_admin,
+        ]);
+    }
+
+   
     return response()->json([
         'success' => true,
         'mensaje' => ProfileMessageHelper::EXITO_RESERVA,
-        'localizador' => $localizador
+        'localizador' => $localizador,
     ]);
 }
-    public function misReservas()
+    
+    
+        public function misReservasApi()
     {
         $user = Auth::user();
         if ($user->email === 'admin@islatransfers.com') {
@@ -115,7 +127,7 @@ class ApiReservaController extends Controller
         return response()->json(['reservas' => $reservas]);
     }
 
-    public function edit($id)
+    public function editApi($id)
     {
         $reserva = TransferReserva::findOrFail($id);
         $user = Auth::user();
@@ -132,7 +144,7 @@ class ApiReservaController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function updateApi(Request $request, $id)
     {
         $reserva = TransferReserva::findOrFail($id);
         $user = Auth::user();
@@ -151,7 +163,7 @@ class ApiReservaController extends Controller
         ]);
     }
 
-    public function cancel($id)
+    public function cancelApi($id)
     {
         $reserva = TransferReserva::findOrFail($id);
         $user = Auth::user();

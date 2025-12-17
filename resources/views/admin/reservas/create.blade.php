@@ -34,7 +34,7 @@
                                 @foreach($hoteles as $h)
                                     {{-- Si falla, mantenemos el valor seleccionado con old() --}}
                                     <option value="{{ $h->id_hotel }}" {{ old('id_hotel_comision') == $h->id_hotel ? 'selected' : '' }}>
-                                        {{ $h->usuario }}
+                                        {{ $h->nombre }}
                                     </option>
                                 @endforeach
                             </select>
@@ -77,7 +77,7 @@
                                 <label class="form-label">Destino (Lugar)</label>
                                 <select name="id_destino" class="form-select" required>
                                     @foreach($hoteles as $h)
-                                        <option value="{{ $h->id_hotel }}">{{ $h->usuario }}</option>
+                                        <option value="{{ $h->id_hotel }}">{{ $h->nombre }}</option>
                                     @endforeach
                                 </select>
                             </div>

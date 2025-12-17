@@ -49,7 +49,7 @@ class ApiViajeroController extends Controller
     // MÉTODOS API (Mantienen el retorno JSON por si usas la App móvil o Postman)
     // -------------------------------------------------------------------------
 
-    public function actualizarDatos(Request $request)
+    public function actualizarDatosApi(Request $request)
     {
         $usuario = Auth::user();
 
@@ -81,7 +81,17 @@ class ApiViajeroController extends Controller
         }
     }
 
-    public function actualizarContrasena(Request $request)
+    public function mostrarPerfilApi()
+    {
+        $usuario = Auth::user();
+        return response()->json([
+        'success' => true,
+        'usuario' => $usuario
+    ]);
+}
+
+
+    public function actualizarContrasenaApi(Request $request)
     {
         $usuario = Auth::user();
 
@@ -98,7 +108,7 @@ class ApiViajeroController extends Controller
         ]);
     }
 
-    public function eliminarUsuario(Request $request)
+    public function eliminarUsuarioApi(Request $request)
     {
         $usuario = Auth::user();
 

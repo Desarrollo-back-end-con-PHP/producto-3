@@ -9,7 +9,7 @@ use App\Models\TransferViajero;
 
 class ApiAuthController extends Controller
 {
-    public function register(Request $request)
+    public function registerApi(Request $request)
     {
         $validated = $request->validate([
             'nombre' => 'required|string|max:100',
@@ -40,7 +40,7 @@ class ApiAuthController extends Controller
         ], 201);
     }
 
-    public function login(Request $request)
+    public function loginApi(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
@@ -65,7 +65,7 @@ class ApiAuthController extends Controller
         ]);
     }
 
-    public function logout(Request $request)
+    public function logoutApi(Request $request)
     {
         $user = $request->user();
         $user->currentAccessToken()->delete();
