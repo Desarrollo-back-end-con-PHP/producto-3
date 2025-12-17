@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminHotelController;
 use App\Http\Controllers\AdminReservaController;
 use App\Http\Controllers\AdminCalendarController;
+use App\Http\Controllers\AdminViajeroController;
 use App\Http\Controllers\HotelAuthController;
 use App\Http\Controllers\HotelPanelController;
 use App\Http\Controllers\ReservaController;
@@ -72,6 +73,19 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     //ELIMINAR (DELETE)
     Route::delete('/hoteles/{id}', [AdminHotelController::class, 'destroy'])->name('admin.hoteles.destroy');
 
+    //------------------------ VIAJEROS --------------------------------------------------
+    // LISTAR (GET)
+    Route::get('/viajeros', [AdminViajeroController::class, 'index'])->name('admin.viajeros.index');
+    // FORMULARIO CREAR (GET)
+    Route::get('/viajeros/crear', [AdminViajeroController::class, 'create'])->name('admin.viajeros.create');
+    // GUARDAR (POST)
+    Route::post('/viajeros', [AdminViajeroController::class, 'store'])->name('admin.viajeros.store');
+    // FORMULARIO EDITAR (GET)
+    Route::get('/viajeros/{id}/editar', [AdminViajeroController::class, 'edit'])->name('admin.viajeros.edit');
+    // ACTUALIZAR (PUT)
+    Route::put('/viajeros/{id}', [AdminViajeroController::class, 'update'])->name('admin.viajeros.update');
+    // ELIMINAR (DELETE)
+    Route::delete('/viajeros/{id}', [AdminViajeroController::class, 'destroy'])->name('admin.viajeros.destroy');
 
     //------------------------ RESERVAS   ------------------------------------------
     //MOSTRAR RESERVAS Y COMISIONES
