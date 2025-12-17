@@ -118,23 +118,70 @@
         </nav>
     </header>
 
-    <main class="container-fluid p-0"> @yield('content')
+    <main class="container-fluid p-0">
+        @yield('content')
     </main>
 
-    <footer class="footer mt-auto py-4 bg-dark text-light">
+<footer class="footer mt-auto py-5 bg-dark text-light">
         <div class="container">
             <div class="row">
-                <div class="col-md-4 mb-3">
-                    <h5><i class="fas fa-plane"></i> Isla Transfers</h5>
-                    <p class="text-light small">Tu servicio de confianza.</p>
-                    <p class="small text-muted">
-                        <a href="{{ route('hotel.login') }}" class="text-decoration-none text-muted">Acceso Hoteles (Partners)</a>
+                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                    <h5 class="fw-bold mb-3">Isla Transfers (Proyecto)</h5>
+                    <p class="small text-secondary mb-2">Tu servicio de confianza para traslados en la isla.</p>
+                    <p class="small text-secondary">
+                        Avenida Ficticia, 123<br>
+                        07001, Palma de Mallorca (Ficticia)<br>
+                        <strong class="text-light">Teléfono:</strong> +34 971 00 00 00<br>
+                        <strong class="text-light">Email:</strong> info@isla-transfers-ficticia.com
                     </p>
                 </div>
+
+                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                    <h5 class="fw-bold mb-3">Enlaces</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="{{ url('/') }}" class="text-secondary text-decoration-none small">Inicio</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-secondary text-decoration-none small">Reservar Ahora</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-secondary text-decoration-none small">Sobre Nosotros</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-secondary text-decoration-none small">Contacto</a>
+                        </li>
+                         <li class="mb-2">
+                             <a href="{{ route('hotel.login') }}" class="text-secondary text-decoration-none small">Acceso Hoteles</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                    <h5 class="fw-bold mb-3">Legal</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="#" class="text-secondary text-decoration-none small">Política de Privacidad</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-secondary text-decoration-none small">Términos y Condiciones</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-secondary text-decoration-none small">Política de Cookies</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                    <h5 class="fw-bold mb-3">Síguenos</h5>
+                    <p class="small text-secondary">Nuestras redes (ficticias):</p>
+                    </div>
             </div>
-            <hr>
-            <div class="text-center text-light small">
-                &copy; {{ date('Y') }} Isla Transfers.
+
+            <hr class="my-4 border-secondary">
+
+            <div class="text-center text-secondary small">
+                &copy; 2025 Isla Transfers (FP.448 - Proyecto Académico). Todos los derechos reservados.
             </div>
         </div>
     </footer>

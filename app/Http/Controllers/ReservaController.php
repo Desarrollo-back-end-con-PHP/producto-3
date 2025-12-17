@@ -42,13 +42,15 @@ public function create()
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+
         $request->validate([
             'id_tipo_reserva' => 'required',
             'id_destino'      => 'required',
             'num_viajeros'    => 'required|integer|min:1',
         ]);
 
-        $user = Auth::user();
+        $localizador = 'LOC-' . strtoupper(uniqid());
 
         // Validación de perfil completo (mantener tu lógica)
         if ($user->email !== "admin@islatransfers.com" &&
@@ -67,6 +69,7 @@ public function create()
         }
 
         TransferReserva::create([
+            'localizador'          => $localizador,
             'id_tipo_reserva'      => $request->id_tipo_reserva,
             'id_destino'           => $request->id_destino,
             'num_viajeros'         => $request->num_viajeros,

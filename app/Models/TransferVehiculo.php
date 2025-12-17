@@ -4,12 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * REVISAR
- * CONTENIDO MINIMO PARA QUE FUNCIONE EL MODELO DE TRANSFER RESERVA
- */
 class TransferVehiculo extends Model
 {
-    protected $table = 'transfer_vehiculos'; // Ojo si es singular o plural en tu BBDD
+    protected $table = 'transfer_vehiculos';
     protected $primaryKey = 'id_vehiculo';
+
+    protected $fillable = [
+        'descripcion',
+        'email_conductor',
+        'password'
+    ];
+
+    public $timestamps = false;
+
+    protected $hidden = ['password'];
 }

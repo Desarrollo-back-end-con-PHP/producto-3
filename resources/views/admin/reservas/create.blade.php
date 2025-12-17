@@ -25,7 +25,7 @@
 
                     <form action="{{ route('admin.reservas.store') }}" method="POST">
                         @csrf
-                        
+
                         {{-- 2. EL CAMPO CLAVE: id_hotel_comision --}}
                         <div class="mb-4 bg-light p-3 rounded border">
                             <label class="form-label fw-bold text-primary">¿A qué Hotel asignamos la comisión?</label>
@@ -44,7 +44,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Fecha Entrada</label>
-                                <input type="date" name="fecha_entrada" class="form-control" 
+                                <input type="date" name="fecha_entrada" class="form-control"
                                        value="{{ $fechaPreseleccionada ?? date('Y-m-d') }}" required>
                             </div>
                             <div class="col-md-6">
@@ -60,24 +60,24 @@
                             <div class="col-md-4">
                                 <label class="form-label">Tipo Reserva</label>
                                 <select name="id_tipo_reserva" class="form-select" required>
-                                    @foreach($tipos as $t) 
-                                        <option value="{{ $t->id_tipo_reserva }}">{{ $t->descripcion }}</option> 
+                                    @foreach($tipos as $t)
+                                        <option value="{{ $t->id_tipo_reserva }}">{{ $t->descripcion }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Vehículo</label>
                                 <select name="id_vehiculo" class="form-select" required>
-                                    @foreach($vehiculos as $v) 
-                                        <option value="{{ $v->id_vehiculo }}">{{ $v->modelo }}</option> 
+                                    @foreach($vehiculos as $v)
+                                        <option value="{{ $v->id_vehiculo }}">{{ $v->descripcion }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Destino (Lugar)</label>
                                 <select name="id_destino" class="form-select" required>
-                                    @foreach($hoteles as $h) 
-                                        <option value="{{ $h->id_hotel }}">{{ $h->usuario }}</option> 
+                                    @foreach($hoteles as $h)
+                                        <option value="{{ $h->id_hotel }}">{{ $h->usuario }}</option>
                                     @endforeach
                                 </select>
                             </div>

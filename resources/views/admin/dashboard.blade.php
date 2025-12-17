@@ -4,20 +4,20 @@
 
 @section('content')
 <div class="container py-5">
-    
+
     {{-- ENCABEZADO CON BOTONES DE ACCIÓN --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="display-6 fw-bold">Panel de Administración</h1>
-        
+
         <div>
             {{-- Botón para ir al CALENDARIO --}}
             <a href="{{ route('admin.calendar') }}" class="btn btn-primary me-2 shadow-sm">
-                <i class="fa fa-calendar-alt"></i> 📅 Ver Calendario
+                <i class="fa fa-calendar-alt"></i> Ver Calendario
             </a>
 
             {{-- Botón para ir al REPORTE DE COMISIONES --}}
             <a href="{{ route('admin.comisiones') }}" class="btn btn-success shadow-sm">
-                <i class="fa fa-chart-line"></i> 💰 Comisiones
+                <i class="fa fa-chart-line"></i> Comisiones
             </a>
         </div>
     </div>
@@ -78,17 +78,17 @@
                                 <td class="fw-bold">{{ $reserva->localizador }}</td>
                                 <td>{{ \Carbon\Carbon::parse($reserva->fecha_entrada)->format('d/m/Y H:i') }}</td>
                                 <td>
-                                    @if($reserva->id_tipo_reserva == 2 && $reserva->hotel) 
-                                        {{ $reserva->hotel->usuario }} 
-                                    @else 
-                                        Aeropuerto 
+                                    @if($reserva->id_tipo_reserva == 2 && $reserva->hotel)
+                                        {{ $reserva->hotel->usuario }}
+                                    @else
+                                        Aeropuerto
                                     @endif
                                 </td>
                                 <td>
-                                    @if(($reserva->id_tipo_reserva == 1 || $reserva->id_tipo_reserva == 3) && $reserva->destino) 
-                                        {{ $reserva->destino->usuario }} 
-                                    @else 
-                                        Aeropuerto 
+                                    @if(($reserva->id_tipo_reserva == 1 || $reserva->id_tipo_reserva == 3) && $reserva->destino)
+                                        {{ $reserva->destino->usuario }}
+                                    @else
+                                        Aeropuerto
                                     @endif
                                 </td>
                                 <td>{{ $reserva->email_cliente }}</td>

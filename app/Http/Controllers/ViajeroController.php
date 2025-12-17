@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ProfileMessageHelper;
+use App\Models\TransferReserva;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -20,9 +21,21 @@ class ViajeroController extends Controller
         $usuario = Auth::user();
         $mensaje = session('mensaje');
 
-        return view('usuario.perfil', [
+        $reservas = TransferReserva::where('email_cliente', $usuario->email)
+                        ->orderBy('fecha_reserva', 'desc')
+                        ->get();
+
+        //dd([
+        //    'Tu Email (Logueado)' => $usuario->email,
+        //    'Cantidad Reservas Encontradas' => $reservas->count(),
+        //    'Datos de la primera reserva' => $reservas->first(),
+        //    'SQL Ejecutado' => \App\Models\TransferReserva::where('email_cliente', $usuario->email)->toSql()
+        //]);
+
+        return view('users.perfil', [
             'usuario' => $usuario,
             'mensaje' => $mensaje,
+            'reservas' => $reservas,
         ]);
     }
 
@@ -49,7 +62,7 @@ class ViajeroController extends Controller
                 'ciudad'       => '',
                 'pais'         => '',
             ], $data);
-            
+
         $exito = $usuario->update($data);
 
         return redirect()->route('usuario.perfil')

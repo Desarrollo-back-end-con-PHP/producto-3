@@ -10,8 +10,7 @@ use App\Http\Controllers\AdminCalendarController;
 use App\Http\Controllers\HotelAuthController;
 use App\Http\Controllers\HotelPanelController;
 use App\Http\Controllers\ReservaController;
-// 1. AÑADIDO: Importamos el controlador para Perfil y Contraseña
-use App\Http\Controllers\Api\ApiViajeroController;
+use App\Http\Controllers\ViajeroController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -37,11 +36,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     // 2. MODIFICADO: Apuntamos al controlador para ver DATOS + RESERVAS
-    Route::get('/usuario/perfil', [ApiViajeroController::class, 'mostrarPerfil'])->name('usuario.perfil');
-
+    Route::get('/usuario/perfil', [ViajeroController::class, 'mostrarPerfil'])->name('usuario.perfil');
     // 3. AÑADIDO: Ruta para guardar la nueva contraseña
-    Route::post('/usuario/password', [ApiViajeroController::class, 'actualizarContrasenaWeb'])->name('usuario.password.update');
-
+    Route::post('/usuario/password', [ViajeroController::class, 'actualizarContrasena'])->name('usuario.password.update');
     // Formulario para crear nueva reserva
     Route::get('/reservas/crear', [ReservaController::class, 'create'])->name('reservas.create');
 
