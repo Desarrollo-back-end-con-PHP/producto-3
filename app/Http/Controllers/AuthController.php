@@ -4,13 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-
 
 class AuthController extends Controller
 {
     /**
-     * Mostar formulario de login
+     * Muestra el formulario de login.
      */
     public function login()
     {
@@ -18,78 +16,34 @@ class AuthController extends Controller
     }
 
     /**
-     * Procesa el login
+     * Procesa la autenticación.
      */
+// En app/Http/Controllers/AuthController.php
+
     public function authenticate(Request $request)
     {
-        //validar que envian el email y la contraseña
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        //comprobamos credenciales y que el usuario tenga estatus activo (no eliminado)
-        if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password'], 'status' => 'activo'])) {
-
-            //regeneramos la sesión
+        if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-
-            $user = Auth::user();
-
-            if ($user->email === 'admin@islatransfers.com') {
-                return redirect()->intended('/admin/dashboard');
+            if (Auth::user()->email === 'admin@islatransfers.com') {
+                return redirect()->route('admin.dashboard');
             }
 
-            return redirect()->intended('/usuario/perfil'); //COMPROBAR QUE ESTA ES LA DIRECCIÓN DEL PERFILE DE USUARIO!!
+            // Si no es el admin, va a la ruta por defecto
+            return redirect()->intended(route('usuario.perfil'));
         }
 
         return back()->withErrors([
-            'email' => 'Las credenciales no cinciden o la cuenta no está activa.',
-        ]);
+            'email' => 'Las credenciales no coinciden con nuestros registros.',
+        ])->onlyInput('email');
     }
 
     /**
-     * Formulario de registro
-     */
-    public function register()
-    {
-        return view('auth.register');
-    }
-
-    /**
-     * Procesar datos formulario de registro
-     */
-    public function store(Request $request)
-    {
-
-        //validar los campos
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:100',
-            'email' => 'required|string|email|max:100|unique:transfer_viajeros',
-            'password' => 'required|string|min:8|confirmed', // confirmed busca un campo 'password_confirmation'
-        ]);
-
-        $user = \App\Models\TransferViajero::create([
-            'nombre' => $validated['nombre'],
-            'email' => $validated['email'],
-            'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
-            'status' => 'activo',
-            // Campos obligatorios vacíos 
-            'apellido1' => '',
-            'apellido2' => '',
-            'direccion' => '',
-            'codigoPostal' => '',
-            'ciudad' => '',
-            'pais' => ''
-        ]);
-
-        Auth::login($user);
-
-        return redirect('/usuario/perfil'); //REVISAR DIRECCIÓN!!
-    }
-
-    /**
-     * Cerrar sesión usuario
+     * Cierra la sesión.
      */
     public function logout(Request $request)
     {
@@ -98,7 +52,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/'); //página de inicio
-
+        return redirect('/');
     }
 }

@@ -16,7 +16,7 @@
                 </a>
             </div>
 
-            <div class="card shadow border-0 border-top border-warning border-4">
+            <div class="card shadow border-0 border-top border-warning border-4 mb-5">
                 <div class="card-body p-5">
 
                     @if ($errors->any())

@@ -27,12 +27,19 @@
 
                         <div class="form-floating mb-3">
                             <input class="form-control" id="nombre" name="nombre" type="text" placeholder="Nombre" value="{{ old('nombre') }}" required />
-                            <label for="nombre">Nombre Completo</label>
+                            <label for="nombre">Nombre</label>
                         </div>
+
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="apellido1" name="apellido1" type="text" placeholder="Primer Apellido" value="{{ old('apellido1') }}" required />
+                            <label for="apellido1">Primer Apellido</label>
+                        </div>
+
                         <div class="form-floating mb-3">
                             <input class="form-control" id="email" name="email" type="email" placeholder="name@example.com" value="{{ old('email') }}" required />
                             <label for="email">Correo Electrónico</label>
                         </div>
+
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <div class="form-floating mb-3 mb-md-0">
@@ -47,6 +54,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="d-grid gap-2 mt-4 mb-0">
                             <button type="submit" class="btn btn-primary btn-lg">Crear Cuenta</button>
                         </div>

@@ -127,4 +127,21 @@ class AdminReservaController extends Controller
         // Lógica update...
         return redirect()->route('admin.calendar');
      }
+     /**
+     * Anular una reserva (Admin)
+     * En lugar de eliminar, la marcamos como cancelada.
+     */
+    public function destroy($id)
+    {
+        $reserva = TransferReserva::findOrFail($id);
+
+        // Actualizamos el estado a cancelada
+        $reserva->update([
+            'status' => 'cancelada',
+            'fecha_modificacion' => now()
+        ]);
+
+        return redirect()->route('admin.reservas.index')
+            ->with('success', 'La reserva ' . $reserva->localizador . ' ha sido anulada correctamente.');
+    }
 }

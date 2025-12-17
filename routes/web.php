@@ -127,6 +127,7 @@ Route::prefix('hotel')->group(function () {
             Route::get('/reservas/{id}/editar', 'edit')->name('hotel.reservas.edit');
             Route::put('/reservas/{id}', 'update')->name('hotel.reservas.update');
             Route::post('/reservas/{id}/cancelar', 'cancel')->name('hotel.reservas.cancel');
+            Route::put('/password/update', 'updatePassword')->name('hotel.password.update');
         });
     });
 });

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash; // <--- AGREGADO
+use Illuminate\Validation\Rules;     // <--- AGREGADO
 use App\Models\TransferReserva;
 use App\Models\TransferZona;
 use App\Models\TransferTipoReserva;
@@ -19,28 +21,61 @@ class HotelPanelController extends Controller
     {
         $hotel = Auth::guard('hotel')->user();
         $comisionPorReserva = $hotel->Comision ?? 10;
-        // 1. Buscamos reservas históricas
+        
         $reservas = TransferReserva::query()
             ->where('id_hotel', $hotel->id_hotel)
             ->with(['vehiculo', 'tipo', 'destino'])
             ->orderBy('fecha_reserva', 'desc')
             ->paginate(10);
-        // 2. Cálculos de comisión (Igual que antes)
+
         $reservasEsteMes = TransferReserva::where('id_hotel', $hotel->id_hotel)
             ->where('status', '!=', 'cancelada')
             ->whereMonth('fecha_reserva', now()->month)
             ->whereYear('fecha_reserva', now()->year)
             ->count();
+
         $comisionMensual = $reservasEsteMes * $comisionPorReserva;
+
         $totalReservasHist = TransferReserva::where('id_hotel', $hotel->id_hotel)
              ->where('status', '!=', 'cancelada')
              ->count();
+
         $totalComisiones = $totalReservasHist * $comisionPorReserva;
+
         $tipos = TransferTipoReserva::all();
         $hotelesDestino = TransferHotel::where('status', 'activo')->orderBy('usuario')->get();
         $vehiculos = TransferVehiculo::all();
+
         return view('hotel.dashboard', compact('hotel', 'reservas', 'comisionMensual', 'totalComisiones', 'tipos', 'hotelesDestino', 'vehiculos'));
     }
+
+    /**
+     * Actualizar Contraseña del Hotel
+     */
+    public function updatePassword(Request $request)
+    {
+        // 1. Validaciones de seguridad
+        $request->validate([
+            'current_password' => ['required', 'current_password:hotel'], // Valida contra la contraseña actual del hotel
+            'password' => ['required', 'confirmed', Rules\Password::defaults()], // 'confirmed' busca password_confirmation
+        ], [
+            'current_password.current_password' => 'La contraseña actual no es correcta.',
+            'password.confirmed' => 'Las nuevas contraseñas no coinciden.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.'
+        ]);
+
+        // 2. Obtener el usuario y actualizar
+        /** @var \App\Models\TransferHotel $hotel */
+        $hotel = Auth::guard('hotel')->user();
+        
+        $hotel->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        // 3. Respuesta al usuario
+        return back()->with('status_password', '¡Contraseña actualizada correctamente!');
+    }
+
     /**
      * Formulario de creación
      */
@@ -100,12 +135,10 @@ class HotelPanelController extends Controller
     {
         $hotel = Auth::guard('hotel')->user();
 
-        // Buscamos la reserva y verificamos que pertenezca al hotel logueado
         $reserva = TransferReserva::where('id_reserva', $id)
                     ->where('id_hotel', $hotel->id_hotel)
                     ->firstOrFail();
 
-        // Listas para los desplegables
         $tipos = TransferTipoReserva::all();
         $vehiculos = TransferVehiculo::all();
         $hotelesDestino = TransferHotel::where('status', 'activo')->orderBy('usuario')->get();
@@ -120,7 +153,6 @@ class HotelPanelController extends Controller
     {
         $hotel = Auth::guard('hotel')->user();
         
-        // Verificación de seguridad
         $reserva = TransferReserva::where('id_reserva', $id)
                     ->where('id_hotel', $hotel->id_hotel)
                     ->firstOrFail();
@@ -130,7 +162,7 @@ class HotelPanelController extends Controller
             'id_tipo_reserva' => 'required',
             'id_destino' => 'required',
             'id_vehiculo' => 'required', 
-            'fecha_entrada' => 'required|date', // Permitimos fechas pasadas si están editando algo histórico, o pon after_or_equal:today
+            'fecha_entrada' => 'required|date',
             'hora_entrada' => 'required',
             'num_viajeros' => 'required|integer|min:1',
         ]);
@@ -159,12 +191,10 @@ class HotelPanelController extends Controller
     {
         $hotel = Auth::guard('hotel')->user();
 
-        // Verificación de seguridad
         $reserva = TransferReserva::where('id_reserva', $id)
                     ->where('id_hotel', $hotel->id_hotel)
                     ->firstOrFail();
 
-        // En lugar de borrar, cambiamos estado a cancelada para mantener historial
         $reserva->status = 'cancelada';
         $reserva->fecha_modificacion = now();
         $reserva->save();
