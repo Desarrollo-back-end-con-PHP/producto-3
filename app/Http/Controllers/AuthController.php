@@ -44,6 +44,11 @@ class AuthController extends Controller
             'email' => 'Las credenciales no coinciden con nuestros registros.',
         ])->onlyInput('email');
     }
+    
+    public function register()
+    {
+        return view('auth.register');
+    }
 
     /**
      * Procesa el registro de un nuevo usuario con bloqueo de dominio corporativo.
