@@ -187,18 +187,22 @@ class ReservaController extends Controller
     public function cancelarUsuario($id)
     {
         $user = Auth::user();
+        // Buscamos la reserva por ID
         $reserva = TransferReserva::findOrFail($id);
-
+    
+        // SEGURIDAD: Validamos que la reserva realmente pertenezca al usuario logueado
         if ($reserva->email_cliente !== $user->email) {
             return redirect()->route('usuario.perfil')
-                ->with('mensaje', 'No tienes permiso para anular esta reserva.');
+                ->with('mensaje', 'No tienes permiso para realizar esta acción.');
         }
-
+    
+        // Procesamos la anulación
         $reserva->status = 'cancelada';
         $reserva->fecha_modificacion = now();
         $reserva->save();
-
-        return redirect()->route('mis.reservas') // Redirigimos a mis reservas para ver el cambio
-            ->with('mensaje_exito', 'La reserva ha sido anulada correctamente.');
+    
+        // REDIRECCIÓN ÚNICA: 
+        return redirect()->route('usuario.perfil')
+        ->with('mensaje', \App\Helpers\ProfileMessageHelper::EXITO_CANCEL_RESERVA);
     }
 }

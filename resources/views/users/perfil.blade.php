@@ -7,12 +7,8 @@
         <div class="row justify-content-center">
             <div class="col-md-9">
                 <div class="card shadow border-0">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <div class="card-header bg-primary text-white">
                         <h4 class="mb-0"><i class="fas fa-user mb-1 me-2"></i>Mi Perfil de Usuario</h4>
-                        {{-- BOTÓN PARA VER TODAS LAS RESERVAS --}}
-                        <a href="{{ route('mis.reservas') }}" class="btn btn-light btn-sm fw-bold shadow-sm">
-                            <i class="fas fa-list-ul me-1"></i> Ver Mis Reservas
-                        </a>
                     </div>
 
                     <div class="card-body p-4">
@@ -21,7 +17,7 @@
                             <div class="row mb-4">
                                 <div class="col-md-12 text-center mb-3">
                                     <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center"
-                                        style="width: 100px; height: 100px;">
+                                         style="width: 100px; height: 100px;">
                                         <i class="fas fa-user-circle fa-4x text-secondary"></i>
                                     </div>
                                 </div>
@@ -118,14 +114,19 @@
 
                             <hr class="my-5">
 
-                            {{-- VISTA PREVIA RÁPIDA DE RESERVAS --}}
+                            {{-- VISTA PREVIA RÁPIDA DE RESERVAS CON BOTÓN DE CREAR --}}
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <h4 class="mb-0 text-primary"><i class="fas fa-suitcase-rolling me-2"></i>Resumen de Reservas</h4>
-                                <a href="{{ route('mis.reservas') }}" class="btn btn-outline-primary btn-sm">Ver historial completo</a>
+                                <div>
+                                    {{-- BOTÓN CREAR RESERVA --}}
+                                    <a href="{{ route('reservas.create') }}" class="btn btn-success btn-sm fw-bold me-2 shadow-sm">
+                                        <i class="fas fa-plus me-1"></i> Crear Reserva
+                                    </a>
+                                    <a href="{{ route('mis.reservas') }}" class="btn btn-outline-primary btn-sm">Ver historial completo</a>
+                                </div>
                             </div>
 
                             @if (isset($reservas) && $reservas->count() > 0)
-                                @php $idsAdmin = \App\Models\TransferReserva::getReservasAdminIds(); @endphp
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle">
                                         <thead class="table-light small text-uppercase">
@@ -138,7 +139,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach ($reservas->take(5) as $reserva) {{-- Solo mostramos las 5 últimas aquí --}}
+                                            @foreach ($reservas->take(5) as $reserva)
                                                 <tr>
                                                     <td class="fw-bold text-primary">{{ $reserva->localizador }}</td>
                                                     <td>{{ \Carbon\Carbon::parse($reserva->fecha_entrada)->format('d/m/Y') }}<br><small class="text-muted">{{ $reserva->hora_entrada }}</small></td>
@@ -155,9 +156,11 @@
                                                     </td>
                                                     <td class="text-center">
                                                         @if($est != 'cancelada')
-                                                            <form action="{{ route('usuario.reservas.cancelar', $reserva->id_reserva) }}" method="POST" onsubmit="return confirm('¿Anular reserva?');">
+                                                            <form action="{{ route('usuario.reservas.cancelar', $reserva->id_reserva) }}" 
+                                                                  method="POST" 
+                                                                  onsubmit="return confirm('¿Estás seguro de que deseas anular la reserva {{ $reserva->localizador }}? Esta acción no se puede deshacer.');">
                                                                 @csrf @method('PUT')
-                                                                <button type="submit" class="btn btn-sm btn-link text-danger">Anular</button>
+                                                                <button type="submit" class="btn btn-sm btn-link text-danger fw-bold">Anular</button>
                                                             </form>
                                                         @endif
                                                     </td>
@@ -169,7 +172,9 @@
                             @else
                                 <div class="alert alert-light border text-center py-4">
                                     <p class="mb-0">Aún no tienes ninguna reserva registrada.</p>
-                                    <a href="{{ route('reservas.create') }}" class="btn btn-primary mt-3">¡Haz tu primera reserva!</a>
+                                    <a href="{{ route('reservas.create') }}" class="btn btn-success mt-3 shadow-sm fw-bold">
+                                        <i class="fas fa-plus me-1"></i> ¡Haz tu primera reserva!
+                                    </a>
                                 </div>
                             @endif
 
