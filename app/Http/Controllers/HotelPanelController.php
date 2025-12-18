@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash; // <--- AGREGADO
-use Illuminate\Validation\Rules;     // <--- AGREGADO
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
 use App\Models\TransferReserva;
 use App\Models\TransferZona;
 use App\Models\TransferTipoReserva;
@@ -16,27 +16,33 @@ class HotelPanelController extends Controller
 {
     /**
      * Muestra el Panel de Control del Hotel logueado.
+     * Muestra tanto reservas creadas por el hotel como las de usuarios dirigidas a él.
      */
     public function index()
     {
         $hotel = Auth::guard('hotel')->user();
         $comisionPorReserva = $hotel->Comision ?? 10;
         
+        // Buscamos reservas donde el hotel sea el creador O sea el destino del servicio
         $reservas = TransferReserva::query()
-            ->where('id_hotel', $hotel->id_hotel)
+            ->where(function($query) use ($hotel) {
+                $query->where('id_hotel', $hotel->id_hotel)
+                      ->orWhere('id_destino', $hotel->id_hotel);
+            })
             ->with(['vehiculo', 'tipo', 'destino'])
-            ->orderBy('fecha_reserva', 'desc')
+            ->orderBy('fecha_entrada', 'desc') // Orden operativo por fecha de servicio
             ->paginate(10);
 
-        $reservasEsteMes = TransferReserva::where('id_hotel', $hotel->id_hotel)
+        // Cálculos basados en servicios que llegan o salen del hotel (id_destino)
+        $reservasEsteMes = TransferReserva::where('id_destino', $hotel->id_hotel)
             ->where('status', '!=', 'cancelada')
-            ->whereMonth('fecha_reserva', now()->month)
-            ->whereYear('fecha_reserva', now()->year)
+            ->whereMonth('fecha_entrada', now()->month)
+            ->whereYear('fecha_entrada', now()->year)
             ->count();
 
         $comisionMensual = $reservasEsteMes * $comisionPorReserva;
 
-        $totalReservasHist = TransferReserva::where('id_hotel', $hotel->id_hotel)
+        $totalReservasHist = TransferReserva::where('id_destino', $hotel->id_hotel)
              ->where('status', '!=', 'cancelada')
              ->count();
 
@@ -54,17 +60,15 @@ class HotelPanelController extends Controller
      */
     public function updatePassword(Request $request)
     {
-        // 1. Validaciones de seguridad
         $request->validate([
-            'current_password' => ['required', 'current_password:hotel'], // Valida contra la contraseña actual del hotel
-            'password' => ['required', 'confirmed', Rules\Password::defaults()], // 'confirmed' busca password_confirmation
+            'current_password' => ['required', 'current_password:hotel'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [
             'current_password.current_password' => 'La contraseña actual no es correcta.',
             'password.confirmed' => 'Las nuevas contraseñas no coinciden.',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.'
         ]);
 
-        // 2. Obtener el usuario y actualizar
         /** @var \App\Models\TransferHotel $hotel */
         $hotel = Auth::guard('hotel')->user();
         
@@ -72,7 +76,6 @@ class HotelPanelController extends Controller
             'password' => Hash::make($request->password)
         ]);
 
-        // 3. Respuesta al usuario
         return back()->with('status_password', '¡Contraseña actualizada correctamente!');
     }
 
@@ -135,8 +138,12 @@ class HotelPanelController extends Controller
     {
         $hotel = Auth::guard('hotel')->user();
 
+        // Validamos propiedad por creador o por ser el destino del servicio
         $reserva = TransferReserva::where('id_reserva', $id)
-                    ->where('id_hotel', $hotel->id_hotel)
+                    ->where(function($q) use ($hotel) {
+                        $q->where('id_hotel', $hotel->id_hotel)
+                          ->orWhere('id_destino', $hotel->id_hotel);
+                    })
                     ->firstOrFail();
 
         $tipos = TransferTipoReserva::all();
@@ -154,7 +161,10 @@ class HotelPanelController extends Controller
         $hotel = Auth::guard('hotel')->user();
         
         $reserva = TransferReserva::where('id_reserva', $id)
-                    ->where('id_hotel', $hotel->id_hotel)
+                    ->where(function($q) use ($hotel) {
+                        $q->where('id_hotel', $hotel->id_hotel)
+                          ->orWhere('id_destino', $hotel->id_hotel);
+                    })
                     ->firstOrFail();
 
         $validated = $request->validate([
@@ -192,7 +202,10 @@ class HotelPanelController extends Controller
         $hotel = Auth::guard('hotel')->user();
 
         $reserva = TransferReserva::where('id_reserva', $id)
-                    ->where('id_hotel', $hotel->id_hotel)
+                    ->where(function($q) use ($hotel) {
+                        $q->where('id_hotel', $hotel->id_hotel)
+                          ->orWhere('id_destino', $hotel->id_hotel);
+                    })
                     ->firstOrFail();
 
         $reserva->status = 'cancelada';
@@ -202,17 +215,23 @@ class HotelPanelController extends Controller
         return redirect()->route('hotel.panel')
             ->with('success', 'Reserva cancelada correctamente.');
     }
+
+    /**
+     * Aceptar reserva pendiente
+     */
     public function aceptar($id)
     {
         $hotel = Auth::guard('hotel')->user();
         
-        // Buscamos la reserva asegurando que pertenezca a este hotel
         $reserva = TransferReserva::where('id_reserva', $id)
-                    ->where('id_hotel', $hotel->id_hotel)
+                    ->where(function($q) use ($hotel) {
+                        $q->where('id_hotel', $hotel->id_hotel)
+                          ->orWhere('id_destino', $hotel->id_hotel);
+                    })
                     ->firstOrFail();
 
         $reserva->update([
-            'status' => 'confirmada', // O 'activa' según tu preferencia para el verde del calendario
+            'status' => 'confirmada',
             'fecha_modificacion' => now()
         ]);
 
