@@ -3,11 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// se cambio la clase base para que soporte autenticación
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-
 
 class TransferViajero extends Authenticatable
 {
@@ -15,6 +13,7 @@ class TransferViajero extends Authenticatable
 
     protected $table = 'transfer_viajeros';
     protected $primaryKey = 'id_viajero';
+
     const CREATED_AT = 'fecha_creacion';
     const UPDATED_AT = null;
 
@@ -28,19 +27,27 @@ class TransferViajero extends Authenticatable
         'pais',
         'email',
         'password',
-        'status'
+        'status',
+        'fecha_creacion'
     ];
 
-    //ocultar la contraseña del JSON
+    protected $attributes = [
+        'apellido2'    => '',
+        'direccion'    => '',
+        'codigoPostal' => '',
+        'ciudad'       => '',
+        'pais'         => '',
+        'status'       => 'activo',
+    ];
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    //crear atributos
     protected $casts = [
-    'password' => 'hashed',
-    'fecha_creacion' => 'datetime',
+        'password'       => 'hashed',
+        'fecha_creacion' => 'datetime',
     ];
 
     public function esAdmin()
