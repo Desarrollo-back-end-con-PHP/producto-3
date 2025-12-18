@@ -124,6 +124,7 @@ Route::prefix('hotel')->group(function () {
             Route::get('/panel', 'index')->name('hotel.panel');
             Route::get('/reservas/crear', 'createReserva')->name('hotel.reservas.create');
             Route::post('/reservas', 'store')->name('hotel.reservas.store');
+            Route::post('/reservas/{id}/aceptar', 'aceptar')->name('hotel.reservas.aceptar');
             Route::get('/reservas/{id}/editar', 'edit')->name('hotel.reservas.edit');
             Route::put('/reservas/{id}', 'update')->name('hotel.reservas.update');
             Route::post('/reservas/{id}/cancelar', 'cancel')->name('hotel.reservas.cancel');

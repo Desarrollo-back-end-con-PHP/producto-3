@@ -22,7 +22,7 @@ class ReservaController extends Controller
 
     public function index()
     {
-        return redirect()->route('reservas.create');
+        return redirect()->route('mis.reservas');
     }
 
     public function create()
@@ -49,6 +49,7 @@ class ReservaController extends Controller
             'num_viajeros'    => 'required|integer|min:1',
         ]);
 
+        // Validación de perfil completo para usuarios normales
         if ($user->email !== "admin@islatransfers.com" &&
             (!$user->nombre || !$user->apellido1 || !$user->email ||
              !$user->direccion || !$user->codigoPostal || !$user->ciudad || !$user->pais)) {
@@ -56,6 +57,7 @@ class ReservaController extends Controller
                 ->with('mensaje', 'Completa tu perfil antes de reservar.');
         }
 
+        // Lógica para Admin creando reserva de cliente
         if ($user->email === "admin@islatransfers.com") {
             if (!$request->email_cliente || !$request->codigo_admin) {
                 return redirect()->back()->with('mensaje', 'Debes indicar email y código admin.');
@@ -95,6 +97,7 @@ class ReservaController extends Controller
             return redirect()->back()->with('mensaje', 'Error al crear la reserva.');
         }
 
+        // Registro de reserva admin si corresponde
         if ($user->email === "admin@islatransfers.com") {
             $reserva = TransferReserva::where('localizador', $localizador)->first();
 
@@ -109,21 +112,29 @@ class ReservaController extends Controller
             ->with('mensaje_exito', '¡Reserva creada correctamente!');
     }
 
-public function misReservas()
-{
-    $user = Auth::user();
+    /**
+     * Muestra el listado de reservas del usuario (o todas si es admin)
+     * unificado con la ruta de carpetas resources/views/users/reservas/mis_reservas.blade.php
+     */
+    public function misReservas()
+    {
+        $user = Auth::user();
 
-    if ($user->email === 'admin@islatransfers.com') {
-        $reservas = TransferReserva::all();
-    } else {
-        $reservas = TransferReserva::where('email_cliente', $user->email)->get();
+        // Cargamos con relaciones para evitar errores en la vista
+        $query = TransferReserva::with(['destino', 'vehiculo', 'tipo']);
+
+        if ($user->email === 'admin@islatransfers.com') {
+            $reservas = $query->orderBy('fecha_reserva', 'desc')->get();
+        } else {
+            $reservas = $query->where('email_cliente', $user->email)
+                              ->orderBy('fecha_reserva', 'desc')
+                              ->get();
+        }
+
+        return view('users.reservas.mis_reservas', [
+            'reservas' => $reservas
+        ]);
     }
-
-    return view('users.reservas.mis_reservas', [
-        'reservas' => $reservas
-    ]);
-}
-
 
     public function edit($id)
     {
@@ -132,18 +143,14 @@ public function misReservas()
 
         if ($user->email !== 'admin@islatransfers.com' &&
             $reserva->email_cliente !== $user->email) {
-
-            return redirect()->route('mis.reservas')
-                ->with('mensaje', 'no_autorizado');
+            return redirect()->route('mis.reservas')->with('mensaje', 'no_autorizado');
         }
-
-        $vehiculos = TransferVehiculo::all();
 
         return view('reservas.editar_reserva', [
             'reserva'   => $reserva,
             'hoteles'   => TransferHotel::all(),
             'trayectos' => TransferTipoReserva::all(),
-            'vehiculos' => $vehiculos,
+            'vehiculos' => TransferVehiculo::all(),
         ]);
     }
 
@@ -154,18 +161,14 @@ public function misReservas()
 
         if ($user->email !== 'admin@islatransfers.com' &&
             $reserva->email_cliente !== $user->email) {
-
-            return redirect()->route('mis.reservas')
-                ->with('mensaje', 'no_autorizado');
+            return redirect()->route('mis.reservas')->with('mensaje', 'no_autorizado');
         }
 
         $reserva->update($request->all());
 
-        return redirect()->route('mis.reservas')
-            ->with('mensaje', 'actualizado_ok');
+        return redirect()->route('mis.reservas')->with('mensaje', 'actualizado_ok');
     }
 
-  
     public function cancel($id)
     {
         $reserva = TransferReserva::findOrFail($id);
@@ -173,29 +176,29 @@ public function misReservas()
 
         if ($user->email !== 'admin@islatransfers.com' &&
             $reserva->email_cliente !== $user->email) {
-
-            return redirect()->route('mis.reservas')
-                ->with('mensaje', 'no_autorizado');
+            return redirect()->route('mis.reservas')->with('mensaje', 'no_autorizado');
         }
 
         $reserva->delete();
 
-        return redirect()->route('mis.reservas')
-            ->with('mensaje', 'cancelado_ok');
+        return redirect()->route('mis.reservas')->with('mensaje', 'cancelado_ok');
     }
 
     public function cancelarUsuario($id)
     {
         $user = Auth::user();
         $reserva = TransferReserva::findOrFail($id);
+
         if ($reserva->email_cliente !== $user->email) {
             return redirect()->route('usuario.perfil')
                 ->with('mensaje', 'No tienes permiso para anular esta reserva.');
         }
+
         $reserva->status = 'cancelada';
         $reserva->fecha_modificacion = now();
         $reserva->save();
-        return redirect()->route('usuario.perfil')
-            ->with('success_pass', 'La reserva ha sido anulada correctamente.');
+
+        return redirect()->route('mis.reservas') // Redirigimos a mis reservas para ver el cambio
+            ->with('mensaje_exito', 'La reserva ha sido anulada correctamente.');
     }
 }

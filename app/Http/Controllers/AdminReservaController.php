@@ -113,6 +113,25 @@ class AdminReservaController extends Controller
             ->with('success', 'Reserva creada manualmente.');
     }
 
+    public function aceptar($id)
+    {
+        // Buscamos la reserva por ID
+        $reserva = TransferReserva::findOrFail($id);
+        
+        // Verificamos que el hotel sea el mismo que está logueado y no se puede cambiar
+        $idHotelLogueado = auth()->user()->id_hotel; 
+
+        // Verificamos que el hotel logueado sea el destino de la reserva
+        if ($reserva->id_destino != $idHotelLogueado) {
+            return redirect()->back()->with('error', 'No tienes permisos para confirmar esta reserva.');
+        }
+
+        // Usamos el método estático del modelo para activarla
+        TransferReserva::confirmarReserva($id);
+
+        return redirect()->back()->with('success', 'Reserva confirmada y activada correctamente.');
+    }
+
     // Función dummy para editar (para que no falle el calendario al hacer clic en una reserva existente)
     public function edit($id) {
         $reserva = TransferReserva::findOrFail($id);

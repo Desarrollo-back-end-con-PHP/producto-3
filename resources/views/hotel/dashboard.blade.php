@@ -18,7 +18,7 @@
         </div>
     </div>
 
-        {{-- SECCIÓN DE SEGURIDAD (CAMBIO DE CONTRASEÑA) --}}
+    {{-- SECCIÓN DE SEGURIDAD (CAMBIO DE CONTRASEÑA) --}}
     <div class="row mb-5">
         <div class="col-lg-5">
             <div class="card shadow-sm border-0">
@@ -26,7 +26,6 @@
                     <h5 class="mb-0 fs-6 fw-bold"><i class="fas fa-lock me-2 text-warning"></i>Cambiar Contraseña</h5>
                 </div>
                 <div class="card-body bg-light">
-                    
                     @if (session('status_password'))
                         <div class="alert alert-success small py-2 mb-3">
                             <i class="fas fa-check me-1"></i> {{ session('status_password') }}
@@ -36,7 +35,6 @@
                     <form action="{{ route('hotel.password.update') }}" method="POST">
                         @csrf
                         @method('PUT')
-
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-uppercase text-muted">Contraseña Actual</label>
                             <input type="password" name="current_password" class="form-control @error('current_password') is-invalid @enderror" required>
@@ -44,7 +42,6 @@
                                 <div class="invalid-feedback small">{{ $message }}</div>
                             @enderror
                         </div>
-
                         <div class="row g-2 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold text-uppercase text-muted">Nueva</label>
@@ -58,7 +55,6 @@
                                 <input type="password" name="password_confirmation" class="form-control" required>
                             </div>
                         </div>
-
                         <div class="d-grid">
                             <button type="submit" class="btn btn-secondary btn-sm fw-bold">Actualizar Clave</button>
                         </div>
@@ -66,7 +62,6 @@
                 </div>
             </div>
         </div>
-        
         <div class="col-lg-7 d-flex align-items-center justify-content-center text-muted opacity-50 d-none d-lg-flex">
             <div class="text-center">
                 <i class="fas fa-shield-alt fa-5x mb-3"></i>
@@ -90,7 +85,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100 border-start border-success border-4">
                 <div class="card-body">
@@ -104,7 +98,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100 border-start border-dark border-4">
                 <div class="card-body">
@@ -127,6 +120,12 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
 
     {{-- 4. TABLA DE RESERVAS --}}
     <div class="card shadow-sm border-0">
@@ -138,7 +137,6 @@
                 <div class="text-center py-5">
                     <i class="fas fa-inbox fa-3x text-muted opacity-25 mb-3"></i>
                     <p class="text-muted">No hay reservas registradas.</p>
-                    <a href="{{ route('hotel.reservas.create') }}" class="btn btn-outline-primary btn-sm">Crear la primera</a>
                 </div>
             @else
                 <div class="table-responsive">
@@ -156,6 +154,9 @@
                         </thead>
                         <tbody>
                             @foreach($reservas as $reserva)
+                            @php
+                                $estado = strtolower(trim($reserva->status));
+                            @endphp
                             <tr>
                                 <td class="ps-4 fw-bold text-primary font-monospace">{{ $reserva->localizador }}</td>
                                 <td>
@@ -173,43 +174,52 @@
                                     <small class="text-muted">{{ $reserva->num_viajeros }} pax</small>
                                 </td>
                                 <td>
-                                    @if($reserva->status == 'confirmada')
+                                    @if($estado == 'confirmada' || $estado == 'activa')
                                         <span class="badge bg-success bg-opacity-10 text-success px-2 py-1">Confirmada</span>
-                                    @elseif($reserva->status == 'cancelada')
+                                    @elseif($estado == 'cancelada')
                                         <span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1">Cancelada</span>
                                     @else
-                                        <span class="badge bg-warning text-dark px-2 py-1">{{ ucfirst($reserva->status) }}</span>
+                                        <span class="badge bg-warning text-dark px-2 py-1">Pendiente</span>
                                     @endif
                                 </td>
                                 <td class="text-center text-success fw-bold">
-                                    @if($reserva->status != 'cancelada')
+                                    @if($estado != 'cancelada')
                                         +{{ number_format($hotel->Comision, 2) }}€
                                     @else
                                         <span class="text-muted text-decoration-line-through small">{{ number_format($hotel->Comision, 2) }}€</span>
                                     @endif
                                 </td>
                                 <td class="text-end pe-4">
-                                    @if($reserva->status != 'cancelada')
-                                        <div class="btn-group">
-                                            <a href="{{ route('hotel.reservas.edit', $reserva->id_reserva) }}" class="btn btn-sm btn-outline-secondary" title="Editar"><i class="fas fa-edit"></i></a>
-                                            <form action="{{ route('hotel.reservas.cancel', $reserva->id_reserva) }}" method="POST" onsubmit="return confirm('¿Cancelar reserva?');">
+                                    <div class="btn-group">
+                                        {{-- BOTÓN ACEPTAR: Aparece si el estado es 'pendiente' --}}
+                                        @if($estado == 'pendiente')
+                                            <form action="{{ route('hotel.reservas.aceptar', $reserva->id_reserva) }}" method="POST" class="me-1">
                                                 @csrf
-                                                <button type="submit" class="btn btn-sm btn-outline-danger ms-1" title="Cancelar"><i class="fas fa-times"></i></button>
+                                                <button type="submit" class="btn btn-sm btn-success" title="Confirmar Reserva" onclick="return confirm('¿Confirmar esta reserva?')">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
                                             </form>
-                                        </div>
-                                    @endif
+                                        @endif
+
+                                        @if($estado != 'cancelada')
+                                            <a href="{{ route('hotel.reservas.edit', $reserva->id_reserva) }}" class="btn btn-sm btn-outline-secondary" title="Editar"><i class="fas fa-edit"></i></a>
+                                            <form action="{{ route('hotel.reservas.cancel', $reserva->id_reserva) }}" method="POST" onsubmit="return confirm('¿Cancelar reserva?');" class="ms-1">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancelar"><i class="fas fa-times"></i></button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
-                <div class="p-3">
+                <div class="p-3 text-center">
                     {{ $reservas->links() }}
                 </div>
             @endif
         </div>
     </div>
-
 </div>
 @endsection

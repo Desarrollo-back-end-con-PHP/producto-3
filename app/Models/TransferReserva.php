@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class TransferReserva extends Model
 {
@@ -41,6 +42,7 @@ class TransferReserva extends Model
         'fecha_vuelo_salida' => 'date',
     ];
 
+    // --- MÉTODOS DE CONSULTA (GETTERS) ---
 
     public static function getReservasPorEmail($email)
     {
@@ -51,81 +53,102 @@ class TransferReserva extends Model
 
     public static function getTodasReservas()
     {
-        return self::where('status', '!=', 'cancelada')
-            ->orderBy('fecha_reserva', 'desc')
-            ->get();
+        return self::orderBy('fecha_reserva', 'desc')->get();
     }
 
     public static function getReservasPorRango($inicio, $fin)
     {
-        return self::where('status', '!=', 'cancelada')
+        return self::with(['destino', 'hotel'])
             ->where(function ($query) use ($inicio, $fin) {
                 $query->whereBetween('fecha_entrada', [$inicio, $fin])
                     ->orWhereBetween('fecha_vuelo_salida', [$inicio, $fin]);
             })
-            ->with('hotel')
             ->orderBy('fecha_entrada')
             ->orderBy('hora_entrada')
-            ->orderBy('fecha_vuelo_salida')
             ->get();
     }
 
+    /**
+     * MÉTODO RESTAURADO: Obtiene los IDs de reservas gestionadas por Admin
+     */
+    public static function getReservasAdminIds()
+    {
+        return DB::table('reserva_admin')->pluck('id_reserva')->toArray();
+    }
+
+    /**
+     * MÉTODO RESTAURADO: Guarda la relación entre reserva y administrador
+     */
+    public static function guardarReservaAdmin($id_reserva, $codigo_admin)
+    {
+        if (empty($id_reserva) || empty($codigo_admin)) return false;
+
+        return DB::table('reserva_admin')->insert([
+            'id_reserva' => $id_reserva,
+            'id_admin' => $codigo_admin
+        ]);
+    }
+
+    public static function getReservaPorId($id_reserva)
+    {
+        return self::find($id_reserva);
+    }
+
+    // --- MÉTODOS DE ACCIÓN (STORE / UPDATE) ---
+
     public static function crearReserva(
-    int $id_tipo_reserva,
-    int $id_destino,
-    ?string $fecha_entrada = null,
-    ?string $hora_entrada = null,
-    int $num_viajeros = 1,
-    ?int $id_vehiculo = null,
-    ?string $numero_vuelo_entrada = null,
-    ?string $origen_vuelo_entrada = null,
-    ?string $fecha_vuelo_salida = null,
-    ?string $hora_vuelo_salida = null,
-    string $email_cliente,
-    ?string $numero_vuelo_salida = null,
-    ?string $hora_recogida = null
-) {
-    try {
-        if (empty($email_cliente)) {
+        int $id_tipo_reserva,
+        int $id_destino,
+        ?string $fecha_entrada = null,
+        ?string $hora_entrada = null,
+        int $num_viajeros = 1,
+        ?int $id_vehiculo = null,
+        ?string $numero_vuelo_entrada = null,
+        ?string $origen_vuelo_entrada = null,
+        ?string $fecha_vuelo_salida = null,
+        ?string $hora_vuelo_salida = null,
+        string $email_cliente,
+        ?string $numero_vuelo_salida = null,
+        ?string $hora_recogida = null
+    ) {
+        try {
+            if (empty($email_cliente)) return false;
+
+            $localizador = uniqid("LOC-");
+            $fecha_actual = now();
+
+            if ($id_tipo_reserva == 1) {
+                $fecha_vuelo_salida = $hora_vuelo_salida = $numero_vuelo_salida = $hora_recogida = null;
+            } elseif ($id_tipo_reserva == 2) {
+                $fecha_entrada = $hora_entrada = $numero_vuelo_entrada = $origen_vuelo_entrada = null;
+            }
+
+            $reserva = self::create([
+                'localizador' => $localizador,
+                'id_tipo_reserva' => $id_tipo_reserva,
+                'email_cliente' => $email_cliente,
+                'fecha_reserva' => $fecha_actual,
+                'fecha_modificacion' => $fecha_actual,
+                'id_destino' => $id_destino,
+                'fecha_entrada' => $fecha_entrada,
+                'hora_entrada' => $hora_entrada,
+                'numero_vuelo_entrada' => $numero_vuelo_entrada,
+                'origen_vuelo_entrada' => $origen_vuelo_entrada,
+                'fecha_vuelo_salida' => $fecha_vuelo_salida,
+                'hora_vuelo_salida' => $hora_vuelo_salida,
+                'numero_vuelo_salida' => $numero_vuelo_salida,
+                'hora_recogida' => $hora_recogida,
+                'num_viajeros' => $num_viajeros ?: 1,
+                'id_vehiculo' => $id_vehiculo ?: 1,
+                'status' => 'pendiente' 
+            ]);
+
+            return $reserva ? $localizador : false;
+
+        } catch (\Exception $e) {
             return false;
         }
-
-        $localizador = uniqid("LOC-");
-        $fecha_actual = now();
-
-
-        if ($id_tipo_reserva == 1) {
-            $fecha_vuelo_salida = $hora_vuelo_salida = $numero_vuelo_salida = $hora_recogida = null;
-        } elseif ($id_tipo_reserva == 2) {
-            $fecha_entrada = $hora_entrada = $numero_vuelo_entrada = $origen_vuelo_entrada = null;
-        }
-
-        $reserva = self::create([
-            'localizador' => $localizador,
-            'id_tipo_reserva' => $id_tipo_reserva,
-            'email_cliente' => $email_cliente,
-            'fecha_reserva' => $fecha_actual,
-            'fecha_modificacion' => $fecha_actual,
-            'id_destino' => $id_destino,
-            'fecha_entrada' => $fecha_entrada,
-            'hora_entrada' => $hora_entrada,
-            'numero_vuelo_entrada' => $numero_vuelo_entrada,
-            'origen_vuelo_entrada' => $origen_vuelo_entrada,
-            'fecha_vuelo_salida' => $fecha_vuelo_salida,
-            'hora_vuelo_salida' => $hora_vuelo_salida,
-            'numero_vuelo_salida' => $numero_vuelo_salida,
-            'hora_recogida' => $hora_recogida,
-            'num_viajeros' => $num_viajeros ?: 1,
-            'id_vehiculo' => $id_vehiculo ?: 1
-        ]);
-
-        return $reserva ? $localizador : false;
-
-    } catch (\Exception $e) {
-        return false;
     }
-}
-
 
     public static function actualizarReserva($id_reserva, $datos)
     {
@@ -144,6 +167,21 @@ class TransferReserva extends Model
         return $reserva->save();
     }
 
+    /**
+    * Solo cambia el estado a 'activa'. 
+    * Útil para el botón rápido de "Aceptar" del hotel.
+    */
+    public static function confirmarReserva($id_reserva)
+    {
+        $reserva = self::find($id_reserva);
+        if (!$reserva) return false;
+
+        $reserva->status = 'activa';
+        $reserva->fecha_modificacion = now();
+
+        return $reserva->save();
+    }
+
     public static function cancelarReserva($id_reserva)
     {
         $reserva = self::find($id_reserva);
@@ -154,46 +192,22 @@ class TransferReserva extends Model
         return $reserva->save();
     }
 
-
-
-    public static function getReservaPorId($id_reserva)
-    {
-        return self::find($id_reserva);
-    }
-
-    public static function guardarReservaAdmin($id_reserva, $codigo_admin)
-    {
-        if (empty($id_reserva) || empty($codigo_admin)) return false;
-
-        return DB::table('reserva_admin')->insert([
-            'id_reserva' => $id_reserva,
-            'id_admin' => $codigo_admin
-        ]);
-    }
-
-    public static function getReservasAdminIds()
-    {
-        return DB::table('reserva_admin')->pluck('id_reserva')->toArray();
-    }
+    // --- RELACIONES ---
 
     public function hotel()
     {
         return $this->belongsTo(TransferHotel::class, 'id_hotel', 'id_hotel');
     }
 
-
     public function vehiculo()
     {
         return $this->belongsTo(TransferVehiculo::class, 'id_vehiculo', 'id_vehiculo');
     }
 
-
     public function tipo()
     {
-
         return $this->belongsTo(TransferTipoReserva::class, 'id_tipo_reserva', 'id_tipo_reserva');
     }
-
 
     public function destino()
     {

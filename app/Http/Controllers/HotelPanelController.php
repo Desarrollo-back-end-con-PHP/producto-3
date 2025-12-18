@@ -202,4 +202,20 @@ class HotelPanelController extends Controller
         return redirect()->route('hotel.panel')
             ->with('success', 'Reserva cancelada correctamente.');
     }
+    public function aceptar($id)
+    {
+        $hotel = Auth::guard('hotel')->user();
+        
+        // Buscamos la reserva asegurando que pertenezca a este hotel
+        $reserva = TransferReserva::where('id_reserva', $id)
+                    ->where('id_hotel', $hotel->id_hotel)
+                    ->firstOrFail();
+
+        $reserva->update([
+            'status' => 'confirmada', // O 'activa' según tu preferencia para el verde del calendario
+            'fecha_modificacion' => now()
+        ]);
+
+        return redirect()->route('hotel.panel')->with('success', 'Reserva aceptada y confirmada.');
+    }
 }
