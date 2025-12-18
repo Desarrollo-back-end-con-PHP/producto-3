@@ -129,9 +129,18 @@
 
     {{-- 4. TABLA DE RESERVAS --}}
     <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3 border-bottom">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-3">
             <h5 class="mb-0 fw-bold text-secondary">Últimas Reservas</h5>
+
+            {{-- BOTONES DE FILTRO DE ESTADO --}}
+            <div class="btn-group shadow-sm" role="group">
+                <a href="{{ route('hotel.panel') }}" class="btn btn-sm btn-outline-secondary {{ !request('status') ? 'active' : '' }}">Todas</a>
+                <a href="{{ route('hotel.panel', ['status' => 'pendiente']) }}" class="btn btn-sm btn-outline-warning {{ request('status') == 'pendiente' ? 'active' : '' }}">Pendientes</a>
+                <a href="{{ route('hotel.panel', ['status' => 'confirmada']) }}" class="btn btn-sm btn-outline-success {{ request('status') == 'confirmada' ? 'active' : '' }}">Confirmadas</a>
+                <a href="{{ route('hotel.panel', ['status' => 'cancelada']) }}" class="btn btn-sm btn-outline-danger {{ request('status') == 'cancelada' ? 'active' : '' }}">Canceladas</a>
+            </div>
         </div>
+
         <div class="card-body p-0">
             @if($reservas->isEmpty())
                 <div class="text-center py-5">
@@ -139,11 +148,13 @@
                     <p class="text-muted">No hay reservas registradas.</p>
                 </div>
             @else
-                <div class="table-responsive">
+                {{-- CONTENEDOR CON SCROLL (Altura máxima 500px) --}}
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-dark text-white text-uppercase small">
+                        {{-- CABECERA STICKY (Se queda arriba al hacer scroll) --}}
+                        <thead class="bg-dark text-white text-uppercase small" style="position: sticky; top: 0; z-index: 10;">
                             <tr>
-                                <th class="ps-4">Ref.</th>
+                                <th class="ps-4 py-3">Ref.</th>
                                 <th>Canal / Origen</th>
                                 <th>Fecha Servicio</th>
                                 <th>Detalles Servicio</th>
@@ -156,16 +167,13 @@
                             @foreach($reservas as $reserva)
                             @php
                                 $estado = strtolower(trim($reserva->status));
-                                
-                                // Lógica de distinción de origen mejorada
                                 $esWeb = is_null($reserva->id_hotel);
-                                // Detectamos admin si el localizador NO empieza por HTL (porque las del hotel las creas con HTL-)
                                 $esAdmin = ($reserva->id_hotel && !str_starts_with($reserva->localizador, 'HTL-'));
                             @endphp
-                            <tr>
+                            {{-- Resaltado suave para filas pendientes --}}
+                            <tr @if($estado == 'pendiente') style="background-color: rgba(255, 193, 7, 0.05);" @endif>
                                 <td class="ps-4 fw-bold text-primary font-monospace">{{ $reserva->localizador }}</td>
                                 
-                                {{-- COLORES DE ORIGEN MEJORADOS --}}
                                 <td>
                                     @if($esWeb)
                                         <span class="badge shadow-sm" style="background-color: #0d6efd; color: white; padding: 0.5rem 1rem; border-radius: 50px;">
@@ -181,12 +189,12 @@
                                         </span>
                                     @endif
                                 </td>
-    
+
                                 <td>
                                     <div class="fw-bold text-dark">{{ \Carbon\Carbon::parse($reserva->fecha_entrada)->format('d/m/Y') }}</div>
                                     <div class="badge bg-secondary small"><i class="far fa-clock me-1"></i>{{ \Carbon\Carbon::parse($reserva->hora_entrada)->format('H:i') }}</div>
                                 </td>
-    
+
                                 <td>
                                     @if($reserva->id_tipo_reserva == 1 || $reserva->id_tipo_reserva == 3)
                                         <div class="text-primary fw-bold small"><i class="fas fa-plane-arrival me-1"></i>LLEGADA</div>
@@ -195,12 +203,12 @@
                                     @endif
                                     <div class="small text-muted text-uppercase" style="font-size: 0.75rem;">{{ $reserva->vehiculo->modelo ?? 'Vehículo' }}</div>
                                 </td>
-    
+
                                 <td>
                                     <div class="fw-bold text-dark mb-0">{{ $reserva->email_cliente }}</div>
                                     <small class="text-muted"><i class="fas fa-users me-1"></i>{{ $reserva->num_viajeros }} pax</small>
                                 </td>
-    
+
                                 <td>
                                     @if($estado == 'confirmada' || $estado == 'activa')
                                         <span class="badge bg-success w-100 py-2">Confirmada</span>
@@ -210,7 +218,7 @@
                                         <span class="badge bg-warning text-dark w-100 py-2">Pendiente</span>
                                     @endif
                                 </td>
-    
+
                                 <td class="text-center pe-4">
                                     <div class="btn-group shadow-sm">
                                         @if($estado == 'pendiente')
@@ -221,7 +229,7 @@
                                                 </button>
                                             </form>
                                         @endif
-    
+
                                         @if($estado != 'cancelada')
                                             <a href="{{ route('hotel.reservas.edit', $reserva->id_reserva) }}" class="btn btn-primary btn-sm px-3" title="Editar">
                                                 <i class="fas fa-edit"></i>
@@ -241,8 +249,9 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="p-3">
-                    {{ $reservas->links() }}
+                {{-- PAGINACIÓN (Fuera del scroll para que no se pierda) --}}
+                <div class="p-3 border-top bg-light text-center">
+                    {{ $reservas->appends(request()->query())->links() }}
                 </div>
             @endif
         </div>

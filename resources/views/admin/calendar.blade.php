@@ -27,7 +27,6 @@
                 </div>
 
                 <div class="col-lg-4 d-flex justify-content-lg-end gap-2">
-                    {{-- Selector de Vistas --}}
                     <div class="btn-group shadow-sm">
                         <a href="{{ route('admin.calendar', ['vista' => 'mes', 'ano' => $fechaBase->year, 'mes' => $fechaBase->month]) }}"
                            class="btn btn-sm {{ $vista == 'mes' ? 'btn-primary' : 'btn-outline-primary' }}">Mes</a>
@@ -37,7 +36,6 @@
                            class="btn btn-sm {{ $vista == 'dia' ? 'btn-primary' : 'btn-outline-primary' }}">Día</a>
                     </div>
 
-                    {{-- Navegación --}}
                     <div class="btn-group shadow-sm">
                         <a href="{{ route('admin.calendar', ['vista' => $vista, 'ano' => $navAnterior->year, 'mes' => $navAnterior->month, 'dia' => $navAnterior->day]) }}" class="btn btn-sm btn-outline-secondary">
                             <i class="fa fa-chevron-left"></i>
@@ -63,7 +61,6 @@
                 .calendar-table td:hover { background-color: #fcfcfc; }
                 .day-number { font-weight: 800; color: #333; font-size: 0.9rem; }
                 
-                /* Estilos de los Badges */
                 .reserva-badge {
                     font-size: 0.72rem; display: block; margin-bottom: 4px;
                     text-decoration: none; color: white !important; padding: 4px 6px;
@@ -72,10 +69,10 @@
                 }
                 .reserva-badge:hover { opacity: 0.9; transform: translateY(-1px); }
                 
-                /* Colores de Estado */
-                .status-activa { background-color: #198754; } 
-                .status-pendiente { background-color: #ffc107; color: #000 !important; }
-                .status-cancelada { background-color: #6c757d; } /* Gris para canceladas */
+                /* AJUSTE DE COLORES SOLICITADOS */
+                .status-confirmada { background-color: #198754 !important; } /* VERDE */
+                .status-pendiente { background-color: #ffc107 !important; color: #000 !important; } /* AMARILLO */
+                .status-cancelada { background-color: #dc3545 !important; } /* ROJO */
                 
                 .td-hoy { background-color: #e8f4ff !important; border: 2px solid #0d6efd !important; }
             </style>
@@ -114,8 +111,16 @@
                                             @if(isset($reservasPorDia[$fechaString]))
                                                 @foreach($reservasPorDia[$fechaString] as $reserva)
                                                     @php
-                                                        $status = strtolower($reserva->status ?? 'pendiente');
-                                                        $classStatus = ($status == 'cancelada') ? 'status-cancelada' : (($status == 'activa') ? 'status-activa' : 'status-pendiente');
+                                                        $status = strtolower(trim($reserva->status));
+                                                        
+                                                        // Lógica de colores unificada
+                                                        if($status == 'confirmada' || $status == 'activa'){
+                                                            $classStatus = 'status-confirmada';
+                                                        } elseif($status == 'cancelada'){
+                                                            $classStatus = 'status-cancelada';
+                                                        } else {
+                                                            $classStatus = 'status-pendiente';
+                                                        }
                                                         
                                                         $esSalida = ($reserva->fecha_vuelo_salida && $reserva->fecha_vuelo_salida->format('Y-m-d') == $fechaString);
                                                         $hora = $esSalida ? $reserva->hora_vuelo_salida : $reserva->hora_entrada;
@@ -143,18 +148,18 @@
         </div>
     </div>
 
-    {{-- LEYENDA INFORMATIVA --}}
+    {{-- LEYENDA INFORMATIVA ACTUALIZADA --}}
     <div class="mt-4 d-flex flex-wrap justify-content-center gap-4 bg-white p-3 rounded shadow-sm border">
         <div class="d-flex align-items-center gap-2">
             <div style="width:14px; height:14px; background-color:#198754; border-radius:3px;"></div>
-            <span class="small fw-bold">Activa / Confirmada</span>
+            <span class="small fw-bold">Confirmada / Activa</span>
         </div>
         <div class="d-flex align-items-center gap-2">
             <div style="width:14px; height:14px; background-color:#ffc107; border-radius:3px;"></div>
             <span class="small fw-bold">Pendiente</span>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <div style="width:14px; height:14px; background-color:#6c757d; border-radius:3px;"></div>
+            <div style="width:14px; height:14px; background-color:#dc3545; border-radius:3px;"></div>
             <span class="small fw-bold">Cancelada</span>
         </div>
         <div class="ms-lg-4 border-start ps-4">

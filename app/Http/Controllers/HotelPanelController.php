@@ -16,21 +16,28 @@ class HotelPanelController extends Controller
 {
     /**
      * Muestra el Panel de Control del Hotel logueado.
-     * Muestra tanto reservas creadas por el hotel como las de usuarios dirigidas a él.
+     * Soporta filtrado por estado y orden prioritario.
      */
-    public function index()
+    public function index(Request $request) // <--- Se añade Request para capturar el filtro
     {
         $hotel = Auth::guard('hotel')->user();
         $comisionPorReserva = $hotel->Comision ?? 10;
         
-        // Buscamos reservas donde el hotel sea el creador O sea el destino del servicio
+        // CONSULTA UNIFICADA CON FILTRO
         $reservas = TransferReserva::query()
             ->where(function($query) use ($hotel) {
                 $query->where('id_hotel', $hotel->id_hotel)
                       ->orWhere('id_destino', $hotel->id_hotel);
             })
+            // AÑADIDO: Filtro dinámico por estado (Si viene en la URL ?status=...)
+            ->when($request->status, function ($query, $status) {
+                return $query->where('status', $status);
+            })
             ->with(['vehiculo', 'tipo', 'destino'])
-            ->orderBy('fecha_entrada', 'desc') // Orden operativo por fecha de servicio
+            // 1. ORDEN PRIORITARIO: Estado 'pendiente' arriba de todo
+            ->orderByRaw("CASE WHEN status = 'pendiente' THEN 0 ELSE 1 END")
+            // 2. ORDEN SECUNDARIO: Las últimas realizadas (creadas) primero
+            ->orderBy('fecha_reserva', 'desc') 
             ->paginate(10);
 
         // Cálculos basados en servicios que llegan o salen del hotel (id_destino)
